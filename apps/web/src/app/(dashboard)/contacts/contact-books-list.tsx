@@ -6,7 +6,7 @@ import DeleteContactBook from "./delete-contact-book";
 import Link from "next/link";
 import EditContactBook from "./edit-contact-book";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { Card } from "@usesend/ui/src/card";
 import { useUrlState } from "~/hooks/useUrlState";
 import { Input } from "@usesend/ui/src/input";
 import { useDebouncedCallback } from "use-debounce";
@@ -33,18 +33,13 @@ export default function ContactBooksList() {
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 ">
         {contactBooksQuery.data?.map((contactBook) => (
-          <motion.div
+          <Card
             key={contactBook.id}
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 200, damping: 10 }}
-            whileTap={{ scale: 0.99 }}
-            className="border rounded-xl shadow hover:shadow-lg"
+            className="flex flex-col overflow-hidden ring-1 ring-transparent transition-[box-shadow,ring] hover:ring-border hover:shadow-md"
           >
-            <div className="flex flex-col">
               <Link href={`/contacts/${contactBook.id}`} key={contactBook.id}>
                 <div className="flex justify-between items-center p-4 mb-4">
                   <div className="flex items-center gap-2">
-                    <div>{contactBook.emoji}</div>
                     <div className="font-semibold truncate whitespace-nowrap overflow-ellipsis w-[180px]">
                       {contactBook.name}
                     </div>
@@ -72,8 +67,7 @@ export default function ContactBooksList() {
                   <DeleteContactBook contactBook={contactBook} />
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </Card>
         ))}
       </div>
     </div>

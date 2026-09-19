@@ -56,7 +56,7 @@ export function WebhookList() {
 
   return (
     <div className="mt-10">
-      <div className="rounded-xl border shadow">
+      <div className="bg-card shadow-card rounded-xl">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/30">

@@ -255,7 +255,7 @@ export default function EmailsList() {
           </Button>
         </div>
       </div>
-      <div className="flex flex-col rounded-xl border shadow">
+      <div className="flex flex-col bg-card shadow-card rounded-xl">
         <Table className="">
           <TableHeader className="">
             <TableRow className=" bg-muted dark:bg-muted/70">

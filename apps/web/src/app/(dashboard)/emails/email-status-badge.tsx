@@ -30,10 +30,12 @@ export const EmailStatusBadge: React.FC<{ status: EmailStatus }> = ({
   }
 
   return (
-    <div
-      className={` text-center w-[130px] rounded capitalize py-1 text-xs ${badgeColor}`}
-    >
-      {status.toLowerCase().split("_").join(" ")}
+    <div className={`w-[130px]`}>
+      <div
+        className={`text-center w-fit px-4 rounded-sm capitalize py-1 text-xs ${badgeColor}`}
+      >
+        {status.toLowerCase().split("_").join(" ")}
+      </div>
     </div>
   );
 };

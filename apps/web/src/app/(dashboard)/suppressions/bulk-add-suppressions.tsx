@@ -35,7 +35,7 @@ export default function BulkAddSuppressionsDialog({
 }: BulkAddSuppressionsDialogProps) {
   const [emails, setEmails] = useState("");
   const [reason, setReason] = useState<SuppressionReason>(
-    SuppressionReason.MANUAL
+    SuppressionReason.MANUAL,
   );
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -189,7 +189,7 @@ export default function BulkAddSuppressionsDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Tabs defaultValue="text" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="text">
                 <FileText className="h-4 w-4 mr-2" />
                 Text Input
@@ -236,11 +236,6 @@ export default function BulkAddSuppressionsDialog({
                     disabled={processing}
                   />
                   <div className="text-center">
-                    <Upload
-                      className={`mx-auto h-12 w-12 ${
-                        isDragOver ? "text-primary" : "text-muted-foreground"
-                      }`}
-                    />
                     <div className="mt-2">
                       <Button
                         type="button"

@@ -114,7 +114,7 @@ export default function DomainItemPage({
             </div>
           </div>
 
-          <div className=" border rounded-lg p-4 shadow">
+          <div className=" bg-card shadow-card rounded-xl p-4">
             <p className="font-semibold text-xl">DNS records</p>
             <Table className="mt-2">
               <TableHeader className="">

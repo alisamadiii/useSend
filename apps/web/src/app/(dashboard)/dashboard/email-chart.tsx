@@ -15,6 +15,7 @@ import { EmailStatusIcon } from "../emails/email-status-badge";
 import { EmailStatus } from "@prisma/client";
 import { api } from "~/trpc/react";
 import Spinner from "@usesend/ui/src/spinner";
+import { Card } from "@usesend/ui/src/card";
 import { useTheme } from "@usesend/ui";
 import { useColors } from "./hooks/useColors";
 
@@ -95,7 +96,7 @@ export default function EmailChart({ days, domain }: EmailChartProps) {
   return (
     <div className="flex flex-col gap-16">
       {!statusQuery.isLoading && statusQuery.data ? (
-        <div className="w-full h-[450px] border shadow rounded-xl p-4">
+        <Card className="w-full h-[450px] p-4">
           <div className="p-2 overflow-x-auto">
             {/* <div className="mb-4 text-sm">Emails</div> */}
 
@@ -264,7 +265,7 @@ export default function EmailChart({ days, domain }: EmailChartProps) {
               ))}
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </Card>
       ) : (
         <div className="h-[450px]"> </div>
       )}
@@ -287,7 +288,7 @@ const DashboardItemCard: React.FC<DashboardItemCardProps> = ({
   percentage,
 }) => {
   return (
-    <div className="h-[100px] w-[16%] min-w-[170px]  bg-secondary/10 border shadow rounded-xl p-4 flex flex-col gap-3">
+    <div className="h-[100px] w-[16%] min-w-[170px] bg-card shadow-card rounded-xl p-4 flex flex-col gap-3">
       <div className="flex items-center gap-3">
         {status !== "total" ? <EmailStatusIcon status={status} /> : null}
         <div className=" capitalize">{status.toLowerCase()}</div>

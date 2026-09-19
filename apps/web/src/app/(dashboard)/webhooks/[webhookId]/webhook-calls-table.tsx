@@ -95,7 +95,7 @@ export function WebhookCallsTable({
           </SelectContent>
         </Select>
       </div>
-      <div className="flex-1 overflow-hidden rounded-xl border shadow flex flex-col">
+      <div className="flex-1 overflow-hidden bg-card shadow-card rounded-xl flex flex-col">
         <Table>
           <TableHeader className="sticky top-0 z-10">
             <TableRow className="bg-muted dark:bg-muted/70">

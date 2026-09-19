@@ -113,7 +113,7 @@ export default function AdminWaitlistPage() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border p-6 shadow-sm">
+      <div className="bg-card shadow-card rounded-xl p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <FormField
@@ -154,7 +154,7 @@ export default function AdminWaitlistPage() {
       ) : null}
 
       {userResult ? (
-        <div className="space-y-4 rounded-lg border p-6 shadow-sm">
+        <div className="space-y-4 bg-card shadow-card rounded-xl p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm text-muted-foreground">Email</p>

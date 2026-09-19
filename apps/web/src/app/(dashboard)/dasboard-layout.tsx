@@ -1,18 +1,13 @@
 "use client";
 
 import { AppSidebar } from "~/components/AppSideBar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@usesend/ui/src/sidebar";
-import { useIsMobile } from "@usesend/ui/src/hooks/use-mobile";
+import { SidebarInset, SidebarProvider } from "@usesend/ui/src/sidebar";
+import { TopHeader } from "~/components/TopHeader";
 import { UpgradeModal } from "~/components/payments/UpgradeModal";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const isMobile = useIsMobile();
   const pathname = usePathname();
   const mainRef = useRef<HTMLElement>(null);
 
@@ -30,14 +25,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     <div className="h-full bg-sidebar-background">
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset className="min-w-0">
+        <SidebarInset className="flex min-w-0 flex-col">
+          <TopHeader />
           <main
             ref={mainRef}
             className="h-full flex-1 overflow-y-auto overflow-x-hidden p-4 xl:px-40"
           >
-            {isMobile ? (
-              <SidebarTrigger className="h-5 w-5 text-muted-foreground" />
-            ) : null}
             {children}
           </main>
         </SidebarInset>

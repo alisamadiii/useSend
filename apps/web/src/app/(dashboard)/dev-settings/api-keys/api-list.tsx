@@ -23,7 +23,7 @@ export default function ApiList() {
 
   return (
     <div className="mt-10">
-      <div className="border rounded-xl shadow">
+      <div className="bg-card shadow-card rounded-xl">
         <Table className="">
           <TableHeader className="">
             <TableRow className=" bg-muted/30">

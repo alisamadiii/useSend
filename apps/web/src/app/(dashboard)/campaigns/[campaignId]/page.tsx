@@ -250,7 +250,7 @@ export default function CampaignDetailsPage({
         <div className=" rounded-lg  mt-16">
           <H2 className="mb-4">Email</H2>
 
-          <div className="p-2 rounded-lg border shadow  flex flex-col gap-4 w-full">
+          <div className="p-2 bg-card shadow-card rounded-xl flex flex-col gap-4 w-full">
             <div className="flex flex-col gap-3 px-4 py-1">
               <div className=" flex text-sm">
                 <div className="w-[70px] text-muted-foreground">Subject</div>

@@ -231,7 +231,7 @@ function CampaignEditor({
 
         <Accordion type="single" collapsible>
           <AccordionItem value="item-1">
-            <div className="flex flex-col border shadow rounded-lg mt-12 mb-12 p-4 w-[700px] mx-auto z-50">
+            <div className="flex flex-col bg-card shadow-card rounded-xl mt-12 mb-12 p-4 w-[700px] mx-auto z-50">
               <div className="flex items-center gap-4">
                 <label className="block text-sm  w-[80px] text-muted-foreground">
                   Subject

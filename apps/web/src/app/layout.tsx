@@ -19,8 +19,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "useSend",
-  description: "Open source email platform",
+  title: "alisamadii Mail",
+  description: "Email platform by Ali Samadii LLC",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

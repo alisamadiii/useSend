@@ -1,24 +1,22 @@
 "use client";
 
+import { MessageSquare, MoreVerticalIcon } from "lucide-react";
 import {
-  BookUser,
-  Code,
-  Cog,
-  MessageSquare,
-  Globe,
-  LayoutTemplate,
-  Mail,
-  Server,
-  Volume2,
-  BookOpenText,
-  BarChart3,
-  LogOutIcon,
-  MoreVerticalIcon,
-  UsersIcon,
-  GaugeIcon,
-  UserRoundX,
-  Webhook,
-} from "lucide-react";
+  AnalyticsIcon,
+  EmailsIcon,
+  TemplatesIcon,
+  SuppressionsIcon,
+  ContactsIcon,
+  CampaignsIcon,
+  DomainsIcon,
+  WebhooksIcon,
+  DeveloperSettingsIcon,
+  SettingsIcon,
+  AdminIcon,
+  TeamIcon,
+  UsageIcon,
+  LogoutIcon,
+} from "./sidebar-icons";
 import { signOut } from "next-auth/react";
 
 import {
@@ -39,7 +37,6 @@ import { MiniThemeSwitcher, ThemeSwitcher } from "./theme/ThemeSwitcher";
 import { useSession } from "next-auth/react";
 import { isCloud, isSelfHosted } from "~/utils/common";
 import { usePathname } from "next/navigation";
-import { Badge } from "@usesend/ui/src/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@usesend/ui/src/avatar";
 import Image from "next/image";
 import {
@@ -59,22 +56,22 @@ const generalItems = [
   {
     title: "Analytics",
     url: "/dashboard",
-    icon: BarChart3,
+    icon: AnalyticsIcon,
   },
   {
     title: "Emails",
     url: "/emails",
-    icon: Mail,
+    icon: EmailsIcon,
   },
   {
     title: "Templates",
     url: "/templates",
-    icon: LayoutTemplate,
+    icon: TemplatesIcon,
   },
   {
     title: "Suppressions",
     url: "/suppressions",
-    icon: UserRoundX,
+    icon: SuppressionsIcon,
   },
 ];
 
@@ -83,12 +80,12 @@ const marketingItems = [
   {
     title: "Contacts",
     url: "/contacts",
-    icon: BookUser,
+    icon: ContactsIcon,
   },
   {
     title: "Campaigns",
     url: "/campaigns",
-    icon: Volume2,
+    icon: CampaignsIcon,
   },
 ];
 
@@ -97,28 +94,28 @@ const settingsItems = [
   {
     title: "Domains",
     url: "/domains",
-    icon: Globe,
+    icon: DomainsIcon,
   },
   {
     title: "Webhooks",
     url: "/webhooks",
-    icon: Webhook,
+    icon: WebhooksIcon,
   },
   {
     title: "Developer settings",
     url: "/dev-settings",
-    icon: Code,
+    icon: DeveloperSettingsIcon,
   },
   {
     title: "Settings",
     url: "/settings",
-    icon: Cog,
+    icon: SettingsIcon,
   },
   // Admin item shows if user is admin OR if it's self-hosted
   {
     title: "Admin",
     url: "/admin",
-    icon: Server,
+    icon: AdminIcon,
     isAdmin: true,
     isSelfHosted: true,
   },
@@ -135,10 +132,14 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarGroupLabel>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-foreground font-mono">
-              useSend
+            <img
+              src="/logo-squircle.png"
+              alt="alisamadii"
+              className="h-6 w-6 rounded-md"
+            />
+            <span className="text-lg font-semibold text-foreground">
+              alisamadii
             </span>
-            <Badge variant="outline">Beta</Badge>
           </div>
         </SidebarGroupLabel>
       </SidebarHeader>
@@ -254,14 +255,6 @@ export function AppSidebar() {
                 />
               </SidebarMenuItem>
             ) : null}
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Docs">
-                <Link href="https://docs.usesend.com" target="_blank">
-                  <BookOpenText />
-                  <span>Docs</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
         {isSelfHosted() && <VersionInfo />}
@@ -354,13 +347,13 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
                 <Link href="/settings/team">
-                  <UsersIcon />
+                  <TeamIcon />
                   Team
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/settings">
-                  <GaugeIcon />
+                  <UsageIcon />
                   Usage
                 </Link>
               </DropdownMenuItem>
@@ -370,7 +363,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => signOut()}>
-              <LogOutIcon />
+              <LogoutIcon />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

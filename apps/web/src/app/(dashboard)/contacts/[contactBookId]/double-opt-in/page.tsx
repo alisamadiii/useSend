@@ -148,7 +148,7 @@ function DoubleOptInEditor({
           </div>
         </div>
 
-        <div className="flex flex-col mt-4 mb-4 p-4 w-full sm:w-[700px] mx-auto z-50 border rounded-lg shadow">
+        <div className="flex flex-col mt-4 mb-4 p-4 w-full sm:w-[700px] mx-auto z-50 bg-card shadow-card rounded-xl">
           <div className="flex items-center gap-4">
             <label className="block text-sm w-[80px] text-muted-foreground">
               Subject

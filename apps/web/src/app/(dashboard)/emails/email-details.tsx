@@ -37,7 +37,7 @@ export default function EmailDetails({ emailId }: { emailId: string }) {
         </div>
       </div>
       <div className="flex flex-col mt-8 items-start gap-8">
-        <div className="p-2 rounded-lg border  flex flex-col gap-2 w-full shadow">
+        <div className="p-2 bg-card shadow-card rounded-xl flex flex-col gap-2 w-full">
           {/* <div className="flex gap-2">
             <span className="w-[100px] text-muted-foreground text-sm">
               From
@@ -98,7 +98,7 @@ export default function EmailDetails({ emailId }: { emailId: string }) {
           </motion.div>
         </div>
         {emailQuery.data?.latestStatus !== "SCHEDULED" ? (
-          <div className=" border rounded-lg w-full shadow mb-2 ">
+          <div className=" bg-card shadow-card rounded-xl w-full mb-2 ">
             <div className="  p-4 flex flex-col gap-8 w-full">
               <div className="font-medium">Events History</div>
               <div className="flex items-stretch px-4 w-full">

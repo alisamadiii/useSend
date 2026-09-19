@@ -14,6 +14,7 @@ import DeleteCampaign from "./delete-campaign";
 import DuplicateCampaign from "./duplicate-campaign";
 import TogglePauseCampaign from "./toggle-pause-campaign";
 import CampaignStatusBadge from "./campaign-status-badge";
+import { Card } from "@usesend/ui/src/card";
 
 interface CampaignCardProps {
   campaign: {
@@ -38,7 +39,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
   const pendingCount = campaign.total - campaign.sent;
 
   return (
-    <div className="border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+    <Card className="p-4 transition-shadow hover:shadow-md">
       {/* Header: Campaign name + status badge */}
       <div className="flex items-center justify-between ">
         <div className="w-1/3">
@@ -141,6 +142,6 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
       {/* Scheduled date for scheduled campaigns */}
 
       {/* Mini stats */}
-    </div>
+    </Card>
   );
 }

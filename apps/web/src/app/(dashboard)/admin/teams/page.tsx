@@ -135,7 +135,7 @@ export default function AdminTeamsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-lg border p-6 shadow-sm">
+      <div className="bg-card shadow-card rounded-xl p-6">
         <Form {...searchForm}>
           <form
             onSubmit={searchForm.handleSubmit(onSearchSubmit)}
@@ -180,7 +180,7 @@ export default function AdminTeamsPage() {
       ) : null}
 
       {team ? (
-        <div className="space-y-6 rounded-lg border p-6 shadow-sm">
+        <div className="space-y-6 bg-card shadow-card rounded-xl p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm text-muted-foreground">Team</p>

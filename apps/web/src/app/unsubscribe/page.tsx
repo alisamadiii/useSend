@@ -168,12 +168,12 @@ export default async function UnsubscribePage({
         <p>
           Powered by{" "}
           <a
-            href="https://usesend.com"
+            href="https://www.alisamadii.com"
             className="font-bold"
             target="_blank"
             rel="noreferrer"
           >
-            useSend
+            alisamadii
           </a>
         </p>
       </div>

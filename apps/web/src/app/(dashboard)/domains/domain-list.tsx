@@ -70,7 +70,7 @@ const DomainItem: React.FC<{ domain: Domain }> = ({ domain }) => {
 
   return (
     <div key={domain.id}>
-      <div className=" pr-8 border rounded-lg flex items-stretch shadow">
+      <div className=" pr-8 bg-card shadow-card rounded-xl flex items-stretch">
         <StatusIndicator status={domain.status} />
         <div className="flex justify-between w-full pl-8 py-4">
           <div className="flex flex-col gap-4 w-1/5">

@@ -7,6 +7,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { SuppressionReason } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@usesend/ui/src/button";
+import { Card } from "@usesend/ui/src/card";
 import { Input } from "@usesend/ui/src/input";
 import {
   Select,
@@ -145,7 +146,7 @@ export default function SuppressionList() {
       </div>
 
       {/* Table */}
-      <div className="flex flex-col rounded-xl border shadow">
+      <Card className="flex flex-col overflow-hidden">
         <Table className="">
           <TableHeader className="">
             <TableRow className=" bg-muted/30">
@@ -211,7 +212,7 @@ export default function SuppressionList() {
             )}
           </TableBody>
         </Table>
-      </div>
+      </Card>
 
       {/* Pagination */}
       <div className="flex gap-4 justify-end">
