@@ -18,8 +18,13 @@ import { LogOut, Trash2 } from "lucide-react";
 export const DeleteTeamMember: React.FC<{
   teamUser: { userId: string; role: Role; email: string };
   self: boolean;
-}> = ({ teamUser, self }) => {
-  const [open, setOpen] = useState(false);
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}> = ({ teamUser, self, open: controlledOpen, onOpenChange }) => {
+  const isControlled = onOpenChange !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? !!controlledOpen : internalOpen;
+  const setOpen = isControlled ? onOpenChange : setInternalOpen;
   const deleteTeamUserMutation = api.team.deleteTeamUser.useMutation();
 
   const utils = api.useUtils();
@@ -47,15 +52,17 @@ export const DeleteTeamMember: React.FC<{
       open={open}
       onOpenChange={(_open) => (_open !== open ? setOpen(_open) : null)}
     >
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm">
-          {self ? (
-            <LogOut className="h-4 w-4 text-red/80" />
-          ) : (
-            <Trash2 className="h-4 w-4 text-red/80" />
-          )}
-        </Button>
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm">
+            {self ? (
+              <LogOut className="h-4 w-4 text-red/80" />
+            ) : (
+              <Trash2 className="h-4 w-4 text-red/80" />
+            )}
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>

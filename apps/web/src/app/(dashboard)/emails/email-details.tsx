@@ -2,7 +2,6 @@
 
 import { UAParser } from "ua-parser-js";
 import { api } from "~/trpc/react";
-import { Separator } from "@usesend/ui/src/separator";
 import { EmailStatusBadge, EmailStatusIcon } from "./email-status-badge";
 import { formatDate } from "date-fns";
 import { motion } from "framer-motion";
@@ -24,116 +23,161 @@ import { getEmailPreviewSrcDoc } from "~/lib/email-preview";
 import CancelEmail from "./cancel-email";
 import { useEffect } from "react";
 import { useState } from "react";
+import Link from "next/link";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@usesend/ui/src/breadcrumb";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@usesend/ui/src/tabs";
+import { TextWithCopyButton } from "@usesend/ui/src/text-with-copy";
+import Spinner from "@usesend/ui/src/spinner";
+
+const MetaField = ({
+  label,
+  value,
+}: {
+  label: string;
+  value?: React.ReactNode;
+}) => (
+  <div className="flex flex-col gap-1">
+    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+      {label}
+    </p>
+    <div className="text-sm break-words">{value ?? "--"}</div>
+  </div>
+);
 
 export default function EmailDetails({ emailId }: { emailId: string }) {
   const emailQuery = api.email.getEmail.useQuery({ id: emailId });
+  const data = emailQuery.data;
+
+  if (emailQuery.isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Spinner className="h-6 w-6" innerSvgClass="stroke-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="h-full overflow-auto px-4 no-scrollbar">
-      <div className="flex justify-between items-center">
-        <div className="flex gap-4 items-center">
-          <h1 className="font-bold">{emailQuery.data?.to}</h1>
-          <EmailStatusBadge status={emailQuery.data?.latestStatus ?? "SENT"} />
+    <div className="flex flex-col gap-8">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/emails" className="text-lg">
+                    Emails
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="text-lg" />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-lg">{data?.to}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <EmailStatusBadge status={data?.latestStatus ?? "SENT"} />
         </div>
-      </div>
-      <div className="flex flex-col mt-8 items-start gap-8">
-        <div className="p-2 bg-card shadow-card rounded-xl flex flex-col gap-2 w-full">
-          {/* <div className="flex gap-2">
-            <span className="w-[100px] text-muted-foreground text-sm">
-              From
-            </span>
-            <span className="text-sm">{emailQuery.data?.from}</span>
-          </div>
-          <Separator />
-          <div className="flex gap-2">
-            <span className="w-[100px] text-muted-foreground text-sm">To</span>
-            <span className="text-sm">{emailQuery.data?.to}</span>
-          </div>
-          <Separator />
-          <div className="flex gap-2">
-            <span className="w-[100px] text-muted-foreground text-sm">
-              Subject
-            </span>
-            <span className="text-sm">{emailQuery.data?.subject}</span>
-          </div> */}
-          <div className="flex flex-col gap-1 px-4 py-1">
-            {/* <div className=" text-[15px] font-medium">
-              {emailQuery.data?.to}
-            </div> */}
-            <div className=" text-sm">Subject: {emailQuery.data?.subject}</div>
-            <div className="text-muted-foreground text-xs">
-              From: {emailQuery.data?.from}
-            </div>
-          </div>
-          {emailQuery.data?.latestStatus === "SCHEDULED" &&
-          emailQuery.data?.scheduledAt ? (
-            <>
-              <Separator />
-              <div className="flex gap-2 items-center px-4">
-                <span className="w-[100px] text-muted-foreground text-sm ">
-                  Scheduled at
-                </span>
-                <span className="text-sm">
-                  {formatDate(
-                    emailQuery.data?.scheduledAt,
-                    "MMM dd'th', hh:mm a",
-                  )}
-                </span>
-                <div className="ml-4">
-                  <CancelEmail emailId={emailId} />
-                </div>
-              </div>
-            </>
-          ) : null}
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2, delay: 0.3 }}
-          >
-            <EmailPreview
-              html={emailQuery.data?.html}
-              text={emailQuery.data?.text}
-            />
-          </motion.div>
-        </div>
-        {emailQuery.data?.latestStatus !== "SCHEDULED" ? (
-          <div className=" bg-card shadow-card rounded-xl w-full mb-2 ">
-            <div className="  p-4 flex flex-col gap-8 w-full">
-              <div className="font-medium">Events History</div>
-              <div className="flex items-stretch px-4 w-full">
-                <div className="border-r border-gray-300 dark:border-gray-700 border-dashed" />
-                <div className="flex flex-col gap-12 w-full">
-                  {emailQuery.data?.emailEvents.map((evt) => (
-                    <div
-                      key={evt.status}
-                      className="flex gap-5 items-start w-full"
-                    >
-                      <div className=" -ml-2.5">
-                        <EmailStatusIcon status={evt.status} />
-                      </div>
-                      <div className="-mt-[0.125rem] w-full">
-                        <div className=" capitalize font-medium">
-                          <EmailStatusBadge status={evt.status} />
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-2">
-                          {formatDate(evt.createdAt, "MMM dd, hh:mm a")}
-                        </div>
-                        <div className="mt-1 text-foreground/80">
-                          <EmailStatusText
-                            status={evt.status}
-                            data={evt.data}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+        {data?.latestStatus === "SCHEDULED" && data?.scheduledAt ? (
+          <CancelEmail emailId={emailId} />
         ) : null}
       </div>
+
+      {/* Metadata */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <MetaField label="From" value={data?.from} />
+        <MetaField label="Subject" value={data?.subject} />
+        <MetaField label="To" value={data?.to} />
+        <div className="flex flex-col gap-1">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            ID
+          </p>
+          <TextWithCopyButton
+            value={data?.id ?? ""}
+            className="w-[200px] overflow-hidden text-sm"
+          />
+        </div>
+        <MetaField
+          label="Created"
+          value={
+            data?.createdAt
+              ? formatDate(data.createdAt, "MMM dd, yyyy 'at' hh:mm a")
+              : "--"
+          }
+        />
+        {data?.scheduledAt ? (
+          <MetaField
+            label="Scheduled"
+            value={formatDate(data.scheduledAt, "MMM dd, yyyy 'at' hh:mm a")}
+          />
+        ) : null}
+      </div>
+
+      {/* Email events */}
+      {data?.latestStatus !== "SCHEDULED" && data?.emailEvents?.length ? (
+        <div className="flex flex-col gap-6">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            Email events
+          </p>
+          <div className="flex items-stretch">
+            <div className="border-r border-border border-dashed" />
+            <div className="flex w-full flex-col gap-10">
+              {data.emailEvents.map((evt) => (
+                <div key={evt.status} className="flex w-full items-start gap-5">
+                  <div className="-ml-2.5">
+                    <EmailStatusIcon status={evt.status} />
+                  </div>
+                  <div className="-mt-[0.125rem] w-full">
+                    <EmailStatusBadge status={evt.status} />
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      {formatDate(evt.createdAt, "MMM dd, hh:mm a")}
+                    </div>
+                    <div className="mt-1 text-foreground/80">
+                      <EmailStatusText status={evt.status} data={evt.data} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Content */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2, delay: 0.2 }}
+        className="bg-card shadow-card rounded-xl p-4"
+      >
+        <Tabs defaultValue="preview" className="w-full">
+          <TabsList>
+            <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="html">HTML</TabsTrigger>
+            <TabsTrigger value="text">Plain Text</TabsTrigger>
+          </TabsList>
+          <TabsContent value="preview" className="mt-4">
+            <EmailPreview html={data?.html} text={data?.text} />
+          </TabsContent>
+          <TabsContent value="html" className="mt-4">
+            <pre className="max-h-[500px] overflow-auto rounded-lg bg-muted/40 p-4 text-xs whitespace-pre-wrap">
+              {data?.html || "No HTML content"}
+            </pre>
+          </TabsContent>
+          <TabsContent value="text" className="mt-4">
+            <pre className="max-h-[500px] overflow-auto rounded-lg bg-muted/40 p-4 text-xs whitespace-pre-wrap">
+              {data?.text || "No plain text content"}
+            </pre>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
     </div>
   );
 }
@@ -224,7 +268,7 @@ const EmailStatusText = ({
           </div>
           <div>
             <p className="text-sm text-muted-foreground">SMTP response</p>
-            <p>{_errorData.bouncedRecipients[0]?.diagnosticCode}</p>
+            <p>{_errorData.bouncedRecipients?.[0]?.diagnosticCode}</p>
           </div>
         </div>
       </div>

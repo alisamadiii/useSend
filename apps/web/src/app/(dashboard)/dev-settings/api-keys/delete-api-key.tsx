@@ -10,7 +10,9 @@ import { z } from "zod";
 
 export const DeleteApiKey: React.FC<{
   apiKey: Partial<ApiKey> & { id: number };
-}> = ({ apiKey }) => {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}> = ({ apiKey, open, onOpenChange }) => {
   const deleteApiKeyMutation = api.apiKey.deleteApiKey.useMutation();
   const utils = api.useUtils();
 
@@ -46,10 +48,14 @@ export const DeleteApiKey: React.FC<{
       schema={apiKeySchema}
       isLoading={deleteApiKeyMutation.isPending}
       onConfirm={onApiKeyDelete}
+      open={open}
+      onOpenChange={onOpenChange}
       trigger={
-        <Button variant="ghost" size="sm">
-          <Trash2 className="h-4 w-4 text-red/80" />
-        </Button>
+        onOpenChange ? undefined : (
+          <Button variant="ghost" size="sm">
+            <Trash2 className="h-4 w-4 text-red/80" />
+          </Button>
+        )
       }
       confirmLabel="Delete API key"
     />

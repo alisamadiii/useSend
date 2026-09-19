@@ -10,7 +10,9 @@ import { z } from "zod";
 
 export const DeleteCampaign: React.FC<{
   campaign: Partial<Campaign> & { id: string };
-}> = ({ campaign }) => {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}> = ({ campaign, open, onOpenChange }) => {
   const deleteCampaignMutation = api.campaign.deleteCampaign.useMutation();
   const utils = api.useUtils();
 
@@ -46,10 +48,14 @@ export const DeleteCampaign: React.FC<{
       schema={campaignSchema}
       isLoading={deleteCampaignMutation.isPending}
       onConfirm={onCampaignDelete}
+      open={open}
+      onOpenChange={onOpenChange}
       trigger={
-        <Button variant="ghost" size="sm" className="p-0 hover:bg-transparent">
-          <Trash2 className="h-[18px] w-[18px] text-red/80" />
-        </Button>
+        onOpenChange ? undefined : (
+          <Button variant="ghost" size="sm" className="p-0 hover:bg-transparent">
+            <Trash2 className="h-[18px] w-[18px] text-red/80" />
+          </Button>
+        )
       }
       confirmLabel="Delete Campaign"
     />

@@ -2,11 +2,18 @@
 
 import { Domain } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Switch } from "@usesend/ui/src/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@usesend/ui/src/table";
 import { api } from "~/trpc/react";
 import React from "react";
-import { StatusIndicator } from "./status-indicator";
 import { DomainStatusBadge } from "./domain-badge";
 import Spinner from "@usesend/ui/src/spinner";
 
@@ -14,33 +21,54 @@ export default function DomainsList() {
   const domainsQuery = api.domain.domains.useQuery();
 
   return (
-    <div className="mt-10">
-      <div className="flex flex-col gap-6">
-        {domainsQuery.isLoading ? (
-          <div className="flex justify-center mt-10">
-            <Spinner
-              className="w-6 h-6 mx-auto"
-              innerSvgClass="stroke-primary"
-            />
-          </div>
-        ) : domainsQuery.data?.length ? (
-          domainsQuery.data?.map((domain) => (
-            <DomainItem key={domain.id} domain={domain} />
-          ))
-        ) : (
-          <div className="text-center mt-20">No domains Added</div>
-        )}
-      </div>
+    <div className="mt-10 flex flex-col">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Domain</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Region</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead className="text-right">Tracking</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {domainsQuery.isLoading ? (
+            <TableRow className="h-32">
+              <TableCell colSpan={5} className="text-center py-4">
+                <Spinner
+                  className="w-6 h-6 mx-auto"
+                  innerSvgClass="stroke-primary"
+                />
+              </TableCell>
+            </TableRow>
+          ) : domainsQuery.data?.length ? (
+            domainsQuery.data?.map((domain) => (
+              <DomainRow key={domain.id} domain={domain} />
+            ))
+          ) : (
+            <TableRow className="h-32">
+              <TableCell
+                colSpan={5}
+                className="text-center py-10 text-muted-foreground"
+              >
+                No domains added
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }
 
-const DomainItem: React.FC<{ domain: Domain }> = ({ domain }) => {
+const DomainRow: React.FC<{ domain: Domain }> = ({ domain }) => {
+  const router = useRouter();
   const updateDomain = api.domain.updateDomain.useMutation();
   const utils = api.useUtils();
 
   const [clickTracking, setClickTracking] = React.useState(
-    domain.clickTracking
+    domain.clickTracking,
   );
   const [openTracking, setOpenTracking] = React.useState(domain.openTracking);
 
@@ -48,11 +76,7 @@ const DomainItem: React.FC<{ domain: Domain }> = ({ domain }) => {
     setClickTracking(!clickTracking);
     updateDomain.mutate(
       { id: domain.id, clickTracking: !clickTracking },
-      {
-        onSuccess: () => {
-          utils.domain.domains.invalidate();
-        },
-      }
+      { onSuccess: () => utils.domain.domains.invalidate() },
     );
   }
 
@@ -60,64 +84,41 @@ const DomainItem: React.FC<{ domain: Domain }> = ({ domain }) => {
     setOpenTracking(!openTracking);
     updateDomain.mutate(
       { id: domain.id, openTracking: !openTracking },
-      {
-        onSuccess: () => {
-          utils.domain.domains.invalidate();
-        },
-      }
+      { onSuccess: () => utils.domain.domains.invalidate() },
     );
   }
 
   return (
-    <div key={domain.id}>
-      <div className=" pr-8 bg-card shadow-card rounded-xl flex items-stretch">
-        <StatusIndicator status={domain.status} />
-        <div className="flex justify-between w-full pl-8 py-4">
-          <div className="flex flex-col gap-4 w-1/5">
-            <Link
-              href={`/domains/${domain.id}`}
-              className="text-lg font-medium underline underline-offset-4 decoration-dashed"
-            >
-              {domain.name}
-            </Link>
-            <DomainStatusBadge status={domain.status} />
+    <TableRow
+      className="cursor-pointer"
+      onClick={() => router.push(`/domains/${domain.id}`)}
+    >
+      <TableCell className="font-medium">{domain.name}</TableCell>
+      <TableCell>
+        <DomainStatusBadge status={domain.status} />
+      </TableCell>
+      <TableCell className="text-muted-foreground">{domain.region}</TableCell>
+      <TableCell className="text-muted-foreground">
+        {formatDistanceToNow(new Date(domain.createdAt), { addSuffix: true })}
+      </TableCell>
+      <TableCell onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-end gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Click</span>
+            <Switch
+              checked={clickTracking}
+              onCheckedChange={handleClickTrackingChange}
+            />
           </div>
-
-          <div className="flex flex-col gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Created at</p>
-              <p className="text-sm">
-                {formatDistanceToNow(new Date(domain.createdAt), {
-                  addSuffix: true,
-                })}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Region</p>
-
-              <p className="text-sm flex items-center gap-2">{domain.region}</p>
-            </div>
-          </div>
-          <div className="flex flex-col gap-6">
-            <div className="flex gap-2 items-center">
-              <p className="text-sm">Click tracking</p>
-              <Switch
-                checked={clickTracking}
-                onCheckedChange={handleClickTrackingChange}
-                className="data-[state=checked]:bg-success"
-              />
-            </div>
-            <div className="flex gap-2 items-center">
-              <p className="text-sm">Open tracking</p>
-              <Switch
-                checked={openTracking}
-                onCheckedChange={handleOpenTrackingChange}
-                className="data-[state=checked]:bg-success"
-              />
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">Open</span>
+            <Switch
+              checked={openTracking}
+              onCheckedChange={handleOpenTrackingChange}
+            />
           </div>
         </div>
-      </div>
-    </div>
+      </TableCell>
+    </TableRow>
   );
 };

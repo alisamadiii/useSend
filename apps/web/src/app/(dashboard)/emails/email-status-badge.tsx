@@ -1,42 +1,34 @@
 import { EmailStatus } from "@prisma/client";
+import { Badge, type BadgeProps } from "@usesend/ui/src/badge";
 
 export const EmailStatusBadge: React.FC<{ status: EmailStatus }> = ({
   status,
 }) => {
-  let badgeColor = "bg-gray-700/10 text-gray-400 border border-gray-400/10"; // Default color
+  let variant: BadgeProps["variant"] = "neutral";
   switch (status) {
     case "DELIVERED":
-      badgeColor = "bg-green/15 text-green border border-green/20";
+      variant = "success";
       break;
     case "BOUNCED":
     case "FAILED":
-      badgeColor = "bg-red/15 text-red border border-red/20";
+      variant = "error";
       break;
     case "CLICKED":
-      badgeColor = "bg-blue/15 text-blue border border-blue/20";
+      variant = "info";
       break;
     case "OPENED":
-      badgeColor = "bg-purple/15 text-purple border border-purple/20";
+      variant = "purple";
       break;
     case "COMPLAINED":
-      badgeColor = "bg-yellow/15 text-yellow border border-yellow/20";
-      break;
     case "DELIVERY_DELAYED":
-      badgeColor = "bg-yellow/15 text-yellow border border-yellow/20";
+      variant = "warning";
       break;
-
-    default:
-      badgeColor = "bg-gray-700/10 text-gray-400 border border-gray-400/10"; // Default color
   }
 
   return (
-    <div className={`w-[130px]`}>
-      <div
-        className={`text-center w-fit px-4 rounded-sm capitalize py-1 text-xs ${badgeColor}`}
-      >
-        {status.toLowerCase().split("_").join(" ")}
-      </div>
-    </div>
+    <Badge variant={variant} className="min-w-[100px] capitalize">
+      {status.toLowerCase().split("_").join(" ")}
+    </Badge>
   );
 };
 

@@ -20,7 +20,14 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
+  <thead
+    ref={ref}
+    className={cn(
+      "[&_tr]:border-0 [&_th:first-child>div]:rounded-l-md [&_th:first-child>div]:border-l [&_th:last-child>div]:rounded-r-md [&_th:last-child>div]:border-r",
+      className,
+    )}
+    {...props}
+  />
 ));
 TableHeader.displayName = "TableHeader";
 
@@ -44,7 +51,7 @@ const TableFooter = React.forwardRef<
     ref={ref}
     className={cn(
       "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
-      className
+      className,
     )}
     {...props}
   />
@@ -58,8 +65,8 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-      className
+      "group/row border-b transition-colors data-[state=selected]:bg-muted",
+      className,
     )}
     {...props}
   />
@@ -69,15 +76,21 @@ TableRow.displayName = "TableRow";
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
->(({ className, ...props }, ref) => (
+>(({ className, children, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
-      className
+      "relative h-10 px-4 text-left align-middle font-normal whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
+      className,
     )}
     {...props}
-  />
+  >
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 border-y border-border bg-muted"
+    />
+    <span className="relative">{children}</span>
+  </th>
 ));
 TableHead.displayName = "TableHead";
 
@@ -87,7 +100,10 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn("p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0", className)}
+    className={cn(
+      "py-3 px-4 align-middle whitespace-nowrap transition-colors group-hover/row:bg-muted/50 first:rounded-l-lg last:rounded-r-lg [&:has([role=checkbox])]:pr-0",
+      className,
+    )}
     {...props}
   />
 ));

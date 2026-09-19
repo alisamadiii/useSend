@@ -15,16 +15,23 @@ const badgeVariants = cva(
           "bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 hover:bg-destructive/20",
         outline:
           "border-border bg-background text-foreground hover:bg-muted hover:text-muted-foreground",
+        success: "bg-green/15 text-green",
+        warning: "bg-yellow/15 text-yellow",
+        error: "bg-red/15 text-red",
+        info: "bg-blue/15 text-blue",
+        purple: "bg-purple/15 text-purple",
+        neutral: "bg-gray/15 text-gray",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {

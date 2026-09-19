@@ -19,11 +19,11 @@ export default function SesConfigurations() {
 
   return (
     <div className="">
-      <div className="bg-card shadow-card rounded-xl">
+      <div>
         <Table className="">
           <TableHeader className="">
-            <TableRow className=" bg-muted/30">
-              <TableHead className="rounded-tl-xl">Region</TableHead>
+            <TableRow className="">
+              <TableHead className="">Region</TableHead>
               <TableHead>Prefix Key</TableHead>
               <TableHead>Callback URL</TableHead>
               <TableHead>Callback status</TableHead>

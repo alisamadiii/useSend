@@ -21,8 +21,7 @@ import {
 import { formatDate, formatDistanceToNow } from "date-fns";
 import { EmailStatus } from "@prisma/client";
 import { EmailStatusBadge } from "./email-status-badge";
-import EmailDetails from "./email-details";
-import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { useUrlState } from "~/hooks/useUrlState";
 import { Button } from "@usesend/ui/src/button";
 import {
@@ -41,22 +40,9 @@ import {
 import { Input } from "@usesend/ui/src/input";
 import { DEFAULT_QUERY_LIMIT } from "~/lib/constants";
 import { useDebouncedCallback } from "use-debounce";
-import { useState } from "react";
-import { SheetTitle, SheetDescription } from "@usesend/ui/src/sheet";
-
-/* Stupid hydrating error. And I so stupid to understand the stupid NextJS docs */
-const DynamicSheetWithNoSSR = dynamic(
-  () => import("@usesend/ui/src/sheet").then((mod) => mod.Sheet),
-  { ssr: false },
-);
-
-const DynamicSheetContentWithNoSSR = dynamic(
-  () => import("@usesend/ui/src/sheet").then((mod) => mod.SheetContent),
-  { ssr: false },
-);
 
 export default function EmailsList() {
-  const [selectedEmail, setSelectedEmail] = useUrlState("emailId");
+  const router = useRouter();
   const [page, setPage] = useUrlState("page", "1");
   const [status, setStatus] = useUrlState("status");
   const [search, setSearch] = useUrlState("search");
@@ -89,7 +75,7 @@ export default function EmailsList() {
   const { data: apiKeysQuery } = api.apiKey.getApiKeys.useQuery();
 
   const handleSelectEmail = (emailId: string) => {
-    setSelectedEmail(emailId);
+    router.push(`/emails/${emailId}`);
   };
 
   const handleDomain = (val: string) => {
@@ -98,12 +84,6 @@ export default function EmailsList() {
 
   const handleApiKey = (val: string) => {
     setApiKey(val === "All API Keys" ? null : val);
-  };
-
-  const handleSheetChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      setSelectedEmail(null);
-    }
   };
 
   const debouncedSearch = useDebouncedCallback((value: string) => {
@@ -255,16 +235,14 @@ export default function EmailsList() {
           </Button>
         </div>
       </div>
-      <div className="flex flex-col bg-card shadow-card rounded-xl">
+      <div className="flex flex-col">
         <Table className="">
-          <TableHeader className="">
-            <TableRow className=" bg-muted dark:bg-muted/70">
-              <TableHead className="rounded-tl-xl">To</TableHead>
+          <TableHeader>
+            <TableRow>
+              <TableHead>To</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Subject</TableHead>
-              <TableHead className="text-right rounded-tr-xl">
-                Sent at
-              </TableHead>
+              <TableHead className="text-right">Sent at</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -334,22 +312,10 @@ export default function EmailsList() {
             )}
           </TableBody>
         </Table>
-
-        <DynamicSheetWithNoSSR
-          open={!!selectedEmail}
-          onOpenChange={handleSheetChange}
-        >
-          <DynamicSheetContentWithNoSSR className="sm:max-w-3xl overflow-y-auto no-scrollbar">
-            <SheetTitle className="sr-only">Email Details</SheetTitle>
-            <SheetDescription className="sr-only">
-              Detailed view of the selected email.
-            </SheetDescription>
-            {selectedEmail ? <EmailDetails emailId={selectedEmail} /> : null}
-          </DynamicSheetContentWithNoSSR>
-        </DynamicSheetWithNoSSR>
       </div>
       <div className="flex gap-4 justify-end">
         <Button
+          variant="outline"
           size="sm"
           onClick={() => setPage((pageNumber - 1).toString())}
           disabled={pageNumber === 1}
@@ -357,6 +323,7 @@ export default function EmailsList() {
           Previous
         </Button>
         <Button
+          variant="outline"
           size="sm"
           onClick={() => setPage((pageNumber + 1).toString())}
           disabled={emailsQuery.data?.emails.length !== DEFAULT_QUERY_LIMIT}

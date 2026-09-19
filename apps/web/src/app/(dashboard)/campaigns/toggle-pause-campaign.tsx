@@ -6,11 +6,13 @@ import React from "react";
 import { Pause, Play } from "lucide-react";
 import { Campaign, CampaignStatus } from "@prisma/client";
 import { toast } from "@usesend/ui/src/toaster";
+import { RowActionItem } from "~/components/RowActions";
 
 export const TogglePauseCampaign: React.FC<{
   campaign: Partial<Campaign> & { id: string; status?: CampaignStatus };
-  mode?: "icon" | "full";
-}> = ({ campaign, mode = "icon" }) => {
+  mode?: "icon" | "full" | "menuitem";
+  onDone?: () => void;
+}> = ({ campaign, mode = "icon", onDone }) => {
   const utils = api.useUtils();
   const pauseMutation = api.campaign.pauseCampaign.useMutation();
   const resumeMutation = api.campaign.resumeCampaign.useMutation();
@@ -50,6 +52,26 @@ export const TogglePauseCampaign: React.FC<{
     campaign.status !== CampaignStatus.RUNNING
   ) {
     return null;
+  }
+
+  if (mode === "menuitem") {
+    return (
+      <RowActionItem
+        icon={
+          isPaused ? (
+            <Play className="h-4 w-4" />
+          ) : (
+            <Pause className="h-4 w-4" />
+          )
+        }
+        label={isPaused ? "Resume" : "Pause"}
+        disabled={pending}
+        onSelect={() => {
+          onToggle();
+          onDone?.();
+        }}
+      />
+    );
   }
 
   return (

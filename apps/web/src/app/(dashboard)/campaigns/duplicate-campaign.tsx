@@ -17,8 +17,13 @@ import { Campaign } from "@prisma/client";
 
 export const DuplicateCampaign: React.FC<{
   campaign: Partial<Campaign> & { id: string };
-}> = ({ campaign }) => {
-  const [open, setOpen] = useState(false);
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}> = ({ campaign, open: controlledOpen, onOpenChange }) => {
+  const isControlled = onOpenChange !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? !!controlledOpen : internalOpen;
+  const setOpen = isControlled ? onOpenChange : setInternalOpen;
   const duplicateCampaignMutation =
     api.campaign.duplicateCampaign.useMutation();
 
@@ -44,11 +49,13 @@ export const DuplicateCampaign: React.FC<{
       open={open}
       onOpenChange={(_open) => (_open !== open ? setOpen(_open) : null)}
     >
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="p-0 hover:bg-transparent">
-          <Copy className="h-[18px] w-[18px] text-blue/80" />
-        </Button>
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm" className="p-0 hover:bg-transparent">
+            <Copy className="h-[18px] w-[18px] text-blue/80" />
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Duplicate Campaign</DialogTitle>

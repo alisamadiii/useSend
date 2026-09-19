@@ -10,7 +10,9 @@ import { z } from "zod";
 
 export const DeleteContact: React.FC<{
   contact: Partial<Contact> & { id: string; contactBookId: string };
-}> = ({ contact }) => {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}> = ({ contact, open, onOpenChange }) => {
   const deleteContactMutation = api.contacts.deleteContact.useMutation();
   const utils = api.useUtils();
 
@@ -48,10 +50,14 @@ export const DeleteContact: React.FC<{
       schema={contactSchema}
       isLoading={deleteContactMutation.isPending}
       onConfirm={onContactDelete}
+      open={open}
+      onOpenChange={onOpenChange}
       trigger={
-        <Button variant="ghost" size="sm">
-          <Trash2 className="h-4 w-4 text-red/80" />
-        </Button>
+        onOpenChange ? undefined : (
+          <Button variant="ghost" size="sm">
+            <Trash2 className="h-4 w-4 text-red/80" />
+          </Button>
+        )
       }
       confirmLabel="Delete Contact"
     />

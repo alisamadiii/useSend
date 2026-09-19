@@ -43,8 +43,13 @@ const contactSchema = z.object({
 export const EditContact: React.FC<{
   contact: Partial<Contact> & { id: string; contactBookId: string };
   contactBookVariables?: string[];
-}> = ({ contact, contactBookVariables }) => {
-  const [open, setOpen] = useState(false);
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}> = ({ contact, contactBookVariables, open: controlledOpen, onOpenChange }) => {
+  const isControlled = onOpenChange !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? !!controlledOpen : internalOpen;
+  const setOpen = isControlled ? onOpenChange : setInternalOpen;
   const updateContactMutation = api.contacts.updateContact.useMutation();
   const initialVariableValues = useMemo(() => {
     const contactProperties =
@@ -126,11 +131,13 @@ export const EditContact: React.FC<{
       open={open}
       onOpenChange={(_open) => (_open !== open ? setOpen(_open) : null)}
     >
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <Edit className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <Edit className="h-4 w-4" />
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Contact</DialogTitle>

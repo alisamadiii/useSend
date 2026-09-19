@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@usesend/ui/src/button";
+import { Badge } from "@usesend/ui/src/badge";
 import {
   Select,
   SelectContent,
@@ -33,8 +34,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@usesend/ui/src/tooltip";
-import { UnsubscribeReason } from "@prisma/client";
-import { Download } from "lucide-react";
+import { Contact, UnsubscribeReason } from "@prisma/client";
+import { Download, Edit, Send, Trash2 } from "lucide-react";
+import React from "react";
+import { RowActions, RowActionItem } from "~/components/RowActions";
 
 function sanitizeFilename(
   name: string | undefined,
@@ -235,14 +238,14 @@ export default function ContactList({
             </Button>
           </div>
         </div>
-        <div className="flex flex-col rounded-xl border border-broder shadow">
+        <div className="flex flex-col">
           <Table className="">
             <TableHeader className="">
-              <TableRow className=" bg-muted/30">
-                <TableHead className="rounded-tl-xl">Email</TableHead>
+              <TableRow className="">
+                <TableHead className="">Email</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="">Created At</TableHead>
-                <TableHead className="rounded-tr-xl">Actions</TableHead>
+                <TableHead className="">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -256,87 +259,15 @@ export default function ContactList({
                   </TableCell>
                 </TableRow>
               ) : contactsQuery.data?.contacts.length ? (
-                contactsQuery.data?.contacts.map((contact) => {
-                  const isPendingConfirmation =
-                    Boolean(doubleOptInEnabled) &&
-                    !contact.subscribed &&
-                    !contact.unsubscribeReason;
-
-                  return (
-                    <TableRow key={contact.id} className="">
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <Image
-                            src={getGravatarUrl(contact.email, {
-                              size: 75,
-                              defaultImage: "robohash",
-                            })}
-                            alt={contact.email + "'s gravatar"}
-                            width={35}
-                            height={35}
-                            className="rounded-full"
-                          />
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium">
-                              {contact.email}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {contact.firstName} {contact.lastName}
-                            </span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {contact.subscribed ? (
-                          <div className="text-center w-[130px] rounded capitalize py-1 text-xs bg-green/15 text-green border border-green/25">
-                            Subscribed
-                          </div>
-                        ) : isPendingConfirmation ? (
-                          <div className="text-center w-[130px] rounded capitalize py-1 text-xs bg-yellow/20 text-yellow border border-yellow/20">
-                            Pending
-                          </div>
-                        ) : (
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <div className="text-center w-[130px] rounded capitalize py-1 text-xs bg-red/10 text-red border border-red/10">
-                                Unsubscribed
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                {getUnsubscribeReason(
-                                  contact.unsubscribeReason ??
-                                    UnsubscribeReason.UNSUBSCRIBED,
-                                )}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                      </TableCell>
-                      <TableCell className="">
-                        {formatDistanceToNow(new Date(contact.createdAt), {
-                          addSuffix: true,
-                        })}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          {isPendingConfirmation ? (
-                            <ResendDoubleOptInConfirmation
-                              contactBookId={contactBookId}
-                              contactId={contact.id}
-                              email={contact.email}
-                            />
-                          ) : null}
-                          <EditContact
-                            contact={contact}
-                            contactBookVariables={contactBookVariables}
-                          />
-                          <DeleteContact contact={contact} />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
+                contactsQuery.data?.contacts.map((contact) => (
+                  <ContactRow
+                    key={contact.id}
+                    contact={contact}
+                    contactBookId={contactBookId}
+                    doubleOptInEnabled={Boolean(doubleOptInEnabled)}
+                    contactBookVariables={contactBookVariables}
+                  />
+                ))
               ) : (
                 <TableRow className="h-32">
                   <TableCell colSpan={4} className="text-center py-4">
@@ -349,6 +280,7 @@ export default function ContactList({
         </div>
         <div className="flex gap-4 justify-end">
           <Button
+            variant="outline"
             size="sm"
             onClick={() => setPage((pageNumber - 1).toString())}
             disabled={pageNumber === 1}
@@ -356,6 +288,7 @@ export default function ContactList({
             Previous
           </Button>
           <Button
+            variant="outline"
             size="sm"
             onClick={() => setPage((pageNumber + 1).toString())}
             disabled={pageNumber >= (contactsQuery.data?.totalPage ?? 0)}
@@ -365,5 +298,139 @@ export default function ContactList({
         </div>
       </div>
     </TooltipProvider>
+  );
+}
+
+function ContactRow({
+  contact,
+  contactBookId,
+  doubleOptInEnabled,
+  contactBookVariables,
+}: {
+  contact: Contact;
+  contactBookId: string;
+  doubleOptInEnabled?: boolean;
+  contactBookVariables?: string[];
+}) {
+  const [action, setAction] = React.useState<
+    "edit" | "delete" | "resend" | null
+  >(null);
+
+  const isPendingConfirmation =
+    Boolean(doubleOptInEnabled) &&
+    !contact.subscribed &&
+    !contact.unsubscribeReason;
+
+  return (
+    <TableRow>
+      <TableCell className="font-medium">
+        <div className="flex items-center gap-2">
+          <Image
+            src={getGravatarUrl(contact.email, {
+              size: 75,
+              defaultImage: "robohash",
+            })}
+            alt={contact.email + "'s gravatar"}
+            width={35}
+            height={35}
+            className="rounded-full"
+          />
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">{contact.email}</span>
+            <span className="text-xs text-muted-foreground">
+              {contact.firstName} {contact.lastName}
+            </span>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        {contact.subscribed ? (
+          <Badge variant="success" className="min-w-[100px] capitalize">
+            Subscribed
+          </Badge>
+        ) : isPendingConfirmation ? (
+          <Badge variant="warning" className="min-w-[100px] capitalize">
+            Pending
+          </Badge>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant="error" className="min-w-[100px] capitalize">
+                Unsubscribed
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {getUnsubscribeReason(
+                  contact.unsubscribeReason ?? UnsubscribeReason.UNSUBSCRIBED,
+                )}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </TableCell>
+      <TableCell>
+        {formatDistanceToNow(new Date(contact.createdAt), {
+          addSuffix: true,
+        })}
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex justify-end">
+          <RowActions>
+            {(close) => (
+              <>
+                {isPendingConfirmation ? (
+                  <RowActionItem
+                    icon={<Send className="h-4 w-4" />}
+                    label="Resend confirmation"
+                    onSelect={() => {
+                      setAction("resend");
+                      close();
+                    }}
+                  />
+                ) : null}
+                <RowActionItem
+                  icon={<Edit className="h-4 w-4" />}
+                  label="Edit"
+                  onSelect={() => {
+                    setAction("edit");
+                    close();
+                  }}
+                />
+                <RowActionItem
+                  icon={<Trash2 className="h-4 w-4" />}
+                  label="Delete"
+                  destructive
+                  onSelect={() => {
+                    setAction("delete");
+                    close();
+                  }}
+                />
+              </>
+            )}
+          </RowActions>
+        </div>
+        {isPendingConfirmation ? (
+          <ResendDoubleOptInConfirmation
+            contactBookId={contactBookId}
+            contactId={contact.id}
+            email={contact.email}
+            open={action === "resend"}
+            onOpenChange={(o) => setAction(o ? "resend" : null)}
+          />
+        ) : null}
+        <EditContact
+          contact={contact}
+          contactBookVariables={contactBookVariables}
+          open={action === "edit"}
+          onOpenChange={(o) => setAction(o ? "edit" : null)}
+        />
+        <DeleteContact
+          contact={contact}
+          open={action === "delete"}
+          onOpenChange={(o) => setAction(o ? "delete" : null)}
+        />
+      </TableCell>
+    </TableRow>
   );
 }

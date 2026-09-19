@@ -16,8 +16,13 @@ import { Trash2 } from "lucide-react";
 
 export const DeleteTeamInvite: React.FC<{
   invite: { id: string; email: string };
-}> = ({ invite }) => {
-  const [open, setOpen] = useState(false);
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}> = ({ invite, open: controlledOpen, onOpenChange }) => {
+  const isControlled = onOpenChange !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? !!controlledOpen : internalOpen;
+  const setOpen = isControlled ? onOpenChange : setInternalOpen;
   const deleteInviteMutation = api.team.deleteTeamInvite.useMutation();
 
   const utils = api.useUtils();
@@ -45,11 +50,13 @@ export const DeleteTeamInvite: React.FC<{
       open={open}
       onOpenChange={(_open) => (_open !== open ? setOpen(_open) : null)}
     >
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <Trash2 className="h-4 w-4 text-red/80" />
-        </Button>
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <Trash2 className="h-4 w-4 text-red/80" />
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Cancel Invite</DialogTitle>

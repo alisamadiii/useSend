@@ -158,13 +158,14 @@ export function WebhookCallsTable({
       </div>
       <div className="flex gap-4 justify-end mt-4">
         <Button
+          variant="outline"
           size="sm"
           onClick={handlePrevPage}
           disabled={cursors.length === 0}
         >
           Previous
         </Button>
-        <Button size="sm" onClick={handleNextPage} disabled={!nextCursor}>
+        <Button variant="outline" size="sm" onClick={handleNextPage} disabled={!nextCursor}>
           Next
         </Button>
       </div>

@@ -1,4 +1,5 @@
 import { CampaignStatus } from "@prisma/client";
+import { Badge, type BadgeProps } from "@usesend/ui/src/badge";
 
 interface CampaignStatusBadgeProps {
   status: CampaignStatus;
@@ -7,30 +8,24 @@ interface CampaignStatusBadgeProps {
 export default function CampaignStatusBadge({
   status,
 }: CampaignStatusBadgeProps) {
-  const getStatusColor = (status: CampaignStatus) => {
+  const getVariant = (status: CampaignStatus): BadgeProps["variant"] => {
     switch (status) {
-      case CampaignStatus.DRAFT:
-        return "bg-gray/15 text-gray border border-gray/20";
       case CampaignStatus.SENT:
-        return "bg-green/15 text-green border border-green/20";
+        return "success";
       case CampaignStatus.RUNNING:
-        return "bg-blue/15 text-blue border border-blue/20";
+        return "info";
       case CampaignStatus.PAUSED:
-        return "bg-yellow/15 text-yellow border border-yellow/20";
+        return "warning";
+      case CampaignStatus.DRAFT:
       case CampaignStatus.SCHEDULED:
-        return "bg-gray/15 text-gray border border-gray/20";
       default:
-        return "bg-gray/15 text-gray border border-gray/20";
+        return "neutral";
     }
   };
 
   return (
-    <div
-      className={`text-center min-w-[110px] rounded capitalize py-1 px-3 text-xs ${getStatusColor(
-        status,
-      )}`}
-    >
+    <Badge variant={getVariant(status)} className="min-w-[100px] capitalize">
       {status.toLowerCase()}
-    </div>
+    </Badge>
   );
 }

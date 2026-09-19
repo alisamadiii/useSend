@@ -1,41 +1,40 @@
 import { WebhookCallStatus } from "@prisma/client";
+import { Badge, type BadgeProps } from "@usesend/ui/src/badge";
 
 export function WebhookCallStatusBadge({
   status,
 }: {
   status: WebhookCallStatus;
 }) {
-  let badgeColor = "bg-gray-700/10 text-gray-400 border border-gray-400/10";
+  let variant: BadgeProps["variant"] = "neutral";
   let label: string = status;
 
   switch (status) {
     case WebhookCallStatus.DELIVERED:
-      badgeColor = "bg-green/15 text-green border border-green/20";
+      variant = "success";
       label = "Delivered";
       break;
     case WebhookCallStatus.FAILED:
-      badgeColor = "bg-red/15 text-red border border-red/20";
+      variant = "error";
       label = "Failed";
       break;
     case WebhookCallStatus.PENDING:
-      badgeColor = "bg-yellow/20 text-yellow border border-yellow/10";
+      variant = "warning";
       label = "Pending";
       break;
     case WebhookCallStatus.IN_PROGRESS:
-      badgeColor = "bg-blue/15 text-blue border border-blue/20";
+      variant = "info";
       label = "In Progress";
       break;
     case WebhookCallStatus.DISCARDED:
-      badgeColor = "bg-gray-700/10 text-gray-400 border border-gray-400/10";
+      variant = "neutral";
       label = "Discarded";
       break;
   }
 
   return (
-    <div
-      className={`text-center w-[110px] rounded capitalize py-1 text-xs ${badgeColor}`}
-    >
+    <Badge variant={variant} className="min-w-[100px] capitalize">
       {label}
-    </div>
+    </Badge>
   );
 }

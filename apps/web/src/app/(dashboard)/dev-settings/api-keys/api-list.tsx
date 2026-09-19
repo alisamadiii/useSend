@@ -14,26 +14,27 @@ import DeleteApiKey from "./delete-api-key";
 import { EditApiKeyDialog } from "./edit-api-key";
 import Spinner from "@usesend/ui/src/spinner";
 import { useState } from "react";
-import { Edit3 } from "lucide-react";
-import { Button } from "@usesend/ui/src/button";
+import { Edit3, Trash2 } from "lucide-react";
+import { RowActions, RowActionItem } from "~/components/RowActions";
 
 export default function ApiList() {
   const apiKeysQuery = api.apiKey.getApiKeys.useQuery();
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   return (
     <div className="mt-10">
-      <div className="bg-card shadow-card rounded-xl">
+      <div>
         <Table className="">
           <TableHeader className="">
-            <TableRow className=" bg-muted/30">
-              <TableHead className="rounded-tl-xl">Name</TableHead>
+            <TableRow className="">
+              <TableHead className="">Name</TableHead>
               <TableHead>Token</TableHead>
               <TableHead>Permission</TableHead>
               <TableHead>Domain Access</TableHead>
               <TableHead>Last used</TableHead>
               <TableHead>Created at</TableHead>
-              <TableHead className="rounded-tr-xl">Action</TableHead>
+              <TableHead className="text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -75,24 +76,46 @@ export default function ApiList() {
                       addSuffix: true,
                     })}
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingId(apiKey.id)}
-                      >
-                        <Edit3 className="h-4 w-4" />
-                      </Button>
-                      <DeleteApiKey apiKey={apiKey} />
-                      <EditApiKeyDialog
-                        apiKey={apiKey}
-                        open={editingId === apiKey.id}
-                        onOpenChange={(open) => {
-                          if (!open) setEditingId(null);
-                        }}
-                      />
+                  <TableCell className="text-right">
+                    <div className="flex justify-end">
+                      <RowActions>
+                        {(close) => (
+                          <>
+                            <RowActionItem
+                              icon={<Edit3 className="h-4 w-4" />}
+                              label="Edit"
+                              onSelect={() => {
+                                setEditingId(apiKey.id);
+                                close();
+                              }}
+                            />
+                            <RowActionItem
+                              icon={<Trash2 className="h-4 w-4" />}
+                              label="Delete"
+                              destructive
+                              onSelect={() => {
+                                setDeletingId(apiKey.id);
+                                close();
+                              }}
+                            />
+                          </>
+                        )}
+                      </RowActions>
                     </div>
+                    <EditApiKeyDialog
+                      apiKey={apiKey}
+                      open={editingId === apiKey.id}
+                      onOpenChange={(open) => {
+                        if (!open) setEditingId(null);
+                      }}
+                    />
+                    <DeleteApiKey
+                      apiKey={apiKey}
+                      open={deletingId === apiKey.id}
+                      onOpenChange={(open) => {
+                        if (!open) setDeletingId(null);
+                      }}
+                    />
                   </TableCell>
                 </TableRow>
               ))

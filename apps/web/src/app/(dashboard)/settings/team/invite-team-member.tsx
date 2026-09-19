@@ -147,8 +147,8 @@ export default function InviteTeamMember() {
       onOpenChange={(_open) => (_open !== open ? onOpenChange(_open) : null)}
     >
       <DialogTrigger asChild>
-        <Button size="sm">
-          <PlusIcon className="mr-2 h-4 w-4" />
+        <Button>
+          <PlusIcon className="mr-1 h-4 w-4" />
           Invite Member
         </Button>
       </DialogTrigger>

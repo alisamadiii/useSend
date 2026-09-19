@@ -17,8 +17,13 @@ import { Template } from "@prisma/client";
 
 export const DuplicateTemplate: React.FC<{
   template: Partial<Template> & { id: string };
-}> = ({ template }) => {
-  const [open, setOpen] = useState(false);
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}> = ({ template, open: controlledOpen, onOpenChange }) => {
+  const isControlled = onOpenChange !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? !!controlledOpen : internalOpen;
+  const setOpen = isControlled ? onOpenChange : setInternalOpen;
   const duplicateTemplateMutation =
     api.template.duplicateTemplate.useMutation();
 
@@ -44,11 +49,13 @@ export const DuplicateTemplate: React.FC<{
       open={open}
       onOpenChange={(_open) => (_open !== open ? setOpen(_open) : null)}
     >
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="p-0 hover:bg-transparent">
-          <Copy className="h-[18px] w-[18px] text-blue/80" />
-        </Button>
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm" className="p-0 hover:bg-transparent">
+            <Copy className="h-[18px] w-[18px] text-blue/80" />
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Duplicate Template</DialogTitle>

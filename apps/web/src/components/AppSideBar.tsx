@@ -135,7 +135,7 @@ export function AppSidebar() {
             <img
               src="/logo-squircle.png"
               alt="alisamadii"
-              className="h-6 w-6 rounded-md"
+              className="h-6 w-6 rounded"
             />
             <span className="text-lg font-semibold text-foreground">
               alisamadii

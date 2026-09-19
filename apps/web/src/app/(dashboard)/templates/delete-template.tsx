@@ -10,7 +10,9 @@ import { z } from "zod";
 
 export const DeleteTemplate: React.FC<{
   template: Partial<Template> & { id: string };
-}> = ({ template }) => {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}> = ({ template, open, onOpenChange }) => {
   const deleteTemplateMutation = api.template.deleteTemplate.useMutation();
   const utils = api.useUtils();
 
@@ -46,10 +48,14 @@ export const DeleteTemplate: React.FC<{
       schema={templateSchema}
       isLoading={deleteTemplateMutation.isPending}
       onConfirm={onTemplateDelete}
+      open={open}
+      onOpenChange={onOpenChange}
       trigger={
-        <Button variant="ghost" size="sm" className="p-0 hover:bg-transparent">
-          <Trash2 className="h-[18px] w-[18px] text-red/80" />
-        </Button>
+        onOpenChange ? undefined : (
+          <Button variant="ghost" size="sm" className="p-0 hover:bg-transparent">
+            <Trash2 className="h-[18px] w-[18px] text-red/80" />
+          </Button>
+        )
       }
       confirmLabel="Delete Template"
     />

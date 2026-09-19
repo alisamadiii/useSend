@@ -149,11 +149,11 @@ export default function SuppressionList() {
       <Card className="flex flex-col overflow-hidden">
         <Table className="">
           <TableHeader className="">
-            <TableRow className=" bg-muted/30">
-              <TableHead className="rounded-tl-xl">Email</TableHead>
+            <TableRow className="">
+              <TableHead className="">Email</TableHead>
               <TableHead>Reason</TableHead>
               <TableHead>Added</TableHead>
-              <TableHead className="rounded-tr-xl">Actions</TableHead>
+              <TableHead className="">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -217,6 +217,7 @@ export default function SuppressionList() {
       {/* Pagination */}
       <div className="flex gap-4 justify-end">
         <Button
+          variant="outline"
           size="sm"
           onClick={() => setPage(String(parseInt(page || "1") - 1))}
           disabled={parseInt(page || "1") === 1}
@@ -224,6 +225,7 @@ export default function SuppressionList() {
           Previous
         </Button>
         <Button
+          variant="outline"
           size="sm"
           onClick={() => setPage(String(parseInt(page || "1") + 1))}
           disabled={!suppressionsQuery.data?.pagination?.hasNext}

@@ -24,37 +24,46 @@ export function ResendDoubleOptInConfirmation({
   contactBookId,
   contactId,
   email,
+  open: controlledOpen,
+  onOpenChange,
 }: {
   contactBookId: string;
   contactId: string;
   email: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const isControlled = onOpenChange !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? !!controlledOpen : internalOpen;
+  const setOpen = isControlled ? onOpenChange : setInternalOpen;
   const utils = api.useUtils();
   const resendMutation =
     api.contacts.resendDoubleOptInConfirmation.useMutation();
 
   return (
     <>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setOpen(true)}
-            disabled={resendMutation.isPending}
-          >
-            {resendMutation.isPending ? (
-              <Spinner className="h-4 w-4" innerSvgClass="stroke-primary" />
-            ) : (
-              <Send className="h-4 w-4 text-muted-foreground" />
-            )}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Resend confirmation email</p>
-        </TooltipContent>
-      </Tooltip>
+      {!isControlled && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setOpen(true)}
+              disabled={resendMutation.isPending}
+            >
+              {resendMutation.isPending ? (
+                <Spinner className="h-4 w-4" innerSvgClass="stroke-primary" />
+              ) : (
+                <Send className="h-4 w-4 text-muted-foreground" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Resend confirmation email</p>
+          </TooltipContent>
+        </Tooltip>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
