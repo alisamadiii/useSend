@@ -22,7 +22,7 @@ export default function Dashboard() {
             setDomain={setDomain}
           />
         </div>
-        <div className=" space-y-12">
+        <div className=" space-y-6">
           <EmailChart days={Number(days ?? "30")} domain={domain} />
 
           <ReputationMetrics days={Number(days ?? "30")} domain={domain} />

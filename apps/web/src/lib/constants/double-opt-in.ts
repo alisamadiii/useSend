@@ -4,22 +4,22 @@ const DEFAULT_DOUBLE_OPT_IN_CONTENT_JSON = {
   type: "doc",
   content: [
     {
-      type: "paragraph",
-      attrs: { textAlign: "left" },
+      type: "heading",
+      attrs: { level: 2, textAlign: "center" },
       content: [
         {
           type: "text",
-          text: "Hello, Thank you for signing up. Please confirm that you want to receive emails from us.",
+          text: "Confirm your subscription",
         },
       ],
     },
     {
       type: "paragraph",
-      attrs: { textAlign: "left" },
+      attrs: { textAlign: "center" },
       content: [
         {
           type: "text",
-          text: "If you did not request this, you can ignore this email.",
+          text: "Thanks for signing up! Tap the button below to confirm your email address and start receiving our emails.",
         },
       ],
     },
@@ -27,26 +27,42 @@ const DEFAULT_DOUBLE_OPT_IN_CONTENT_JSON = {
       type: "button",
       attrs: {
         component: "button",
-        text: "Confirm",
+        text: "Confirm subscription",
         url: "{{doubleOptInUrl}}",
-        alignment: "left",
-        borderRadius: "8",
-        borderWidth: "1",
-        buttonColor: "#000000",
-        borderColor: "#000000",
+        alignment: "center",
+        borderRadius: "10",
+        borderWidth: "0",
+        buttonColor: "#e8825e",
+        borderColor: "#e8825e",
         textColor: "#ffffff",
       },
+    },
+    {
+      type: "paragraph",
+      attrs: { textAlign: "center" },
+      content: [
+        {
+          type: "text",
+          marks: [{ type: "textStyle", attrs: { color: "#9ca3af" } }],
+          text: "If the button doesn't work, copy and paste this link into your browser: ",
+        },
+        {
+          type: "variable",
+          attrs: { id: "doubleOptInUrl", name: "doubleOptInUrl", fallback: "" },
+        },
+      ],
     },
     {
       type: "horizontalRule",
     },
     {
       type: "paragraph",
-      attrs: { textAlign: "left" },
+      attrs: { textAlign: "center" },
       content: [
         {
           type: "text",
-          text: "You are receiving this email because you opted in via our site.",
+          marks: [{ type: "textStyle", attrs: { color: "#9ca3af" } }],
+          text: "You're receiving this email because you signed up on our site. Didn't request this? You can safely ignore it.",
         },
       ],
     },

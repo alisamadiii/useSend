@@ -19,10 +19,12 @@ import { useState } from "react";
 import { EditWebhookDialog } from "./webhook-update-dialog";
 import { useRouter } from "next/navigation";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@usesend/ui/src/popover";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@usesend/ui/src/dropdown-menu";
+import { Trash2 } from "lucide-react";
 import { type Webhook } from "@prisma/client";
 import { WebhookStatusBadge } from "./webhook-status-badge";
 
@@ -158,56 +160,54 @@ function WebhookActions({
   isToggling: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const isPaused = webhook.status === "PAUSED";
   const isAutoDisabled = webhook.status === "AUTO_DISABLED";
   const canActivate = isPaused || isAutoDisabled;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <MoreVertical className="h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-48 rounded-xl p-1" align="end">
-        <div className="flex flex-col">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="justify-start rounded-lg hover:bg-accent"
-            onClick={() => {
-              onEdit();
-              setOpen(false);
-            }}
-          >
-            <Edit3 className="mr-2 h-4 w-4" />
-            Edit
+    <>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm">
+            <MoreVertical className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="justify-start rounded-lg hover:bg-accent"
-            onClick={() => {
-              onToggleStatus();
-              setOpen(false);
-            }}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-48" align="end">
+          <DropdownMenuItem onSelect={() => onEdit()}>
+            <Edit3 className="h-4 w-4" />
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem
             disabled={isToggling}
+            onSelect={() => onToggleStatus()}
           >
             {canActivate ? (
               <>
-                <Play className="mr-2 h-4 w-4" />
+                <Play className="h-4 w-4" />
                 {isAutoDisabled ? "Re-enable" : "Resume"}
               </>
             ) : (
               <>
-                <Pause className="mr-2 h-4 w-4" />
+                <Pause className="h-4 w-4" />
                 Pause
               </>
             )}
-          </Button>
-          <DeleteWebhook webhook={webhook} />
-        </div>
-      </PopoverContent>
-    </Popover>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+            onSelect={() => setIsDeleteOpen(true)}
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <DeleteWebhook
+        webhook={webhook}
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+      />
+    </>
   );
 }

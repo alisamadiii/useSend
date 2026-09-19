@@ -4,21 +4,23 @@ export function useColors() {
   const { resolvedTheme } = useTheme();
 
   const lightColors = {
-    delivered: "#40a02b",
-    bounced: "#d20f39",
-    complained: "#df8e1d",
-    opened: "#8839ef",
-    clicked: "#04a5e5",
-    xaxis: "#6D6F84",
+    delivered: "#e8825e",
+    bounced: "#dc2626",
+    complained: "#d97706",
+    opened: "#8b5cf6",
+    clicked: "#3b82f6",
+    rate: "#e8825e",
+    xaxis: "#8a8580",
   };
 
   const darkColors = {
-    delivered: "#a6e3a1",
-    bounced: "#f38ba8",
-    complained: "#F9E2AF",
-    opened: "#cba6f7",
-    clicked: "#93c5fd",
-    xaxis: "#AAB1CD",
+    delivered: "#f0977a",
+    bounced: "#f87171",
+    complained: "#fbbf24",
+    opened: "#a78bfa",
+    clicked: "#60a5fa",
+    rate: "#f0977a",
+    xaxis: "#a8a29e",
   };
 
   const currentColors = resolvedTheme === "dark" ? darkColors : lightColors;

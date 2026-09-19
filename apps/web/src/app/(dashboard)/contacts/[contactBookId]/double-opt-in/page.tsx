@@ -4,11 +4,15 @@ import { Editor } from "@usesend/email-editor";
 import { Spinner } from "@usesend/ui/src/spinner";
 import { Input } from "@usesend/ui/src/input";
 import { toast } from "@usesend/ui/src/toaster";
-import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { use, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import {
+  EmailEditorShell,
+  EditorMetaRow,
+  EditorSaveStatus,
+} from "~/components/email-editor-shell";
 import {
   DEFAULT_DOUBLE_OPT_IN_SUBJECT,
   DOUBLE_OPT_IN_EDITOR_VARIABLES,
@@ -49,7 +53,7 @@ export default function DoubleOptInEditorPage({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-full">
+      <div className="fixed inset-0 z-40 grid place-items-center bg-background">
         <Spinner className="w-6 h-6" />
       </div>
     );
@@ -57,7 +61,7 @@ export default function DoubleOptInEditorPage({
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-full">
+      <div className="fixed inset-0 z-40 grid place-items-center bg-background">
         <p className="text-red">Failed to load double opt-in settings</p>
       </div>
     );
@@ -121,38 +125,37 @@ function DoubleOptInEditor({
   const debouncedUpdateContent = useDebouncedCallback(updateContent, 1000);
 
   return (
-    <div className="p-4 container mx-auto">
-      <div className="mx-auto">
-        <div className="mb-4 flex justify-between items-center w-full sm:w-[700px] mx-auto">
-          <div className="flex items-center gap-3">
-            <Link href={`/contacts/${contactBook.id}`}>
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-            <div>
-              <div className="text-sm text-muted-foreground">
-                Double opt-in email
-              </div>
-              <div className="text-base font-medium">{contactBook.name}</div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
-            {isSaving ? (
-              <div className="h-2 w-2 bg-yellow rounded-full" />
-            ) : (
-              <div className="h-2 w-2 bg-green rounded-full" />
-            )}
-            {formatDistanceToNow(contactBook.updatedAt) === "less than a minute"
-              ? "just now"
-              : `${formatDistanceToNow(contactBook.updatedAt)} ago`}
-          </div>
-        </div>
-
-        <div className="flex flex-col mt-4 mb-4 p-4 w-full sm:w-[700px] mx-auto z-50 bg-card shadow-card rounded-xl">
-          <div className="flex items-center gap-4">
-            <label className="block text-sm w-[80px] text-muted-foreground">
-              Subject
-            </label>
+    <EmailEditorShell
+      topBarLeft={
+        <>
+          <Link
+            href={`/contacts/${contactBook.id}`}
+            className="mr-1 flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            aria-label="Back to contact book"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <Link
+            href={`/contacts/${contactBook.id}`}
+            className="text-sm text-muted-foreground hover:text-foreground whitespace-nowrap"
+          >
+            {contactBook.name}
+          </Link>
+          <span className="text-muted-foreground/50">/</span>
+          <span className="text-sm font-medium whitespace-nowrap">
+            Double opt-in email
+          </span>
+        </>
+      }
+      topBarRight={
+        <EditorSaveStatus
+          isSaving={isSaving}
+          updatedAt={contactBook.updatedAt}
+        />
+      }
+      metaRows={
+        <>
+          <EditorMetaRow label="Subject">
             <Input
               type="text"
               value={subject}
@@ -188,83 +191,80 @@ function DoubleOptInEditor({
                   },
                 );
               }}
-              className="mt-1 py-1 text-sm block w-full outline-none border-b border-transparent focus:border-border bg-transparent"
+              className="py-1 text-sm block w-full outline-none border-0 bg-transparent px-0 focus-visible:ring-0"
             />
-          </div>
-          <div className="flex items-center gap-4 mt-4">
-            <label className="block text-sm w-[80px] text-muted-foreground">
-              From
-            </label>
-            <Input
-              type="text"
-              value={from}
-              onChange={(e) => {
-                setFrom(e.target.value);
-              }}
-              onBlur={() => {
-                const normalizedFrom = from.trim();
-                const currentFrom = contactBook.doubleOptInFrom ?? "";
+          </EditorMetaRow>
+          <EditorMetaRow label="From">
+            <div className="flex flex-col gap-1">
+              <Input
+                type="text"
+                value={from}
+                onChange={(e) => {
+                  setFrom(e.target.value);
+                }}
+                onBlur={() => {
+                  const normalizedFrom = from.trim();
+                  const currentFrom = contactBook.doubleOptInFrom ?? "";
 
-                if (normalizedFrom === currentFrom) {
-                  return;
-                }
-
-                setIsSaving(true);
-                updateContactBook.mutate(
-                  {
-                    contactBookId: contactBook.id,
-                    doubleOptInFrom: normalizedFrom || null,
-                  },
-                  {
-                    onError: (error) => {
-                      toast.error(error.message);
-                      setIsSaving(false);
-                      setFrom(contactBook.doubleOptInFrom ?? "");
-                    },
-                  },
-                );
-              }}
-              placeholder="Friendly name<hello@example.com>"
-              className="mt-1 py-1 text-sm block w-full outline-none border-b border-transparent focus:border-border bg-transparent"
-            />
-          </div>
-          <p className="text-xs text-muted-foreground mt-3">
-            Use the variable <code>{"{{doubleOptInUrl}}"}</code> for the
-            confirmation link.
-          </p>
-        </div>
-
-        <div className="rounded-lg bg-gray-50 w-full sm:w-[700px] mx-auto p-4 sm:p-10">
-          <div className="w-full sm:w-[600px] mx-auto">
-            <Editor
-              initialContent={json}
-              onUpdate={(content) => {
-                const nextContent = content.getJSON();
-                const serializedContent = JSON.stringify(nextContent);
-
-                setJson(nextContent);
-
-                if (!hasDoubleOptInUrlPlaceholder(serializedContent)) {
-                  debouncedUpdateContent.cancel();
-                  setIsSaving(false);
-
-                  if (!hasShownMissingPlaceholderToast.current) {
-                    toast.error(DOUBLE_OPT_IN_URL_REQUIRED_MESSAGE);
-                    hasShownMissingPlaceholderToast.current = true;
+                  if (normalizedFrom === currentFrom) {
+                    return;
                   }
 
-                  return;
-                }
+                  setIsSaving(true);
+                  updateContactBook.mutate(
+                    {
+                      contactBookId: contactBook.id,
+                      doubleOptInFrom: normalizedFrom || null,
+                    },
+                    {
+                      onError: (error) => {
+                        toast.error(error.message);
+                        setIsSaving(false);
+                        setFrom(contactBook.doubleOptInFrom ?? "");
+                      },
+                    },
+                  );
+                }}
+                placeholder="Friendly name<hello@example.com>"
+                className="py-1 text-sm block w-full outline-none border-0 bg-transparent px-0 focus-visible:ring-0"
+              />
+              <p className="text-xs text-muted-foreground">
+                Use the variable <code>{"{{doubleOptInUrl}}"}</code> for the
+                confirmation link.
+              </p>
+            </div>
+          </EditorMetaRow>
+        </>
+      }
+    >
+      <div className="w-full">
+        <Editor
+          initialContent={json}
+          onUpdate={(content) => {
+            const nextContent = content.getJSON();
+            const serializedContent = JSON.stringify(nextContent);
 
-                hasShownMissingPlaceholderToast.current = false;
-                setIsSaving(true);
-                debouncedUpdateContent(serializedContent);
-              }}
-              variables={DOUBLE_OPT_IN_EDITOR_VARIABLES}
-            />
-          </div>
-        </div>
+            setJson(nextContent);
+
+            if (!hasDoubleOptInUrlPlaceholder(serializedContent)) {
+              debouncedUpdateContent.cancel();
+              setIsSaving(false);
+
+              if (!hasShownMissingPlaceholderToast.current) {
+                toast.error(DOUBLE_OPT_IN_URL_REQUIRED_MESSAGE);
+                hasShownMissingPlaceholderToast.current = true;
+              }
+
+              return;
+            }
+
+            hasShownMissingPlaceholderToast.current = false;
+            setIsSaving(true);
+            debouncedUpdateContent(serializedContent);
+          }}
+          variables={DOUBLE_OPT_IN_EDITOR_VARIABLES}
+        />
       </div>
-    </div>
+    </EmailEditorShell>
   );
 }

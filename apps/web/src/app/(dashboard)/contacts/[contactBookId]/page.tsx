@@ -15,10 +15,11 @@ import BulkUploadContacts from "./bulk-upload-contacts";
 import ContactList from "./contact-list";
 import { formatDistanceToNow } from "date-fns";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@usesend/ui/src/popover";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@usesend/ui/src/dropdown-menu";
 import { Button } from "@usesend/ui/src/button";
 import { Switch } from "@usesend/ui/src/switch";
 import { use, useState } from "react";
@@ -62,70 +63,39 @@ function ContactBookDetailActions({
 
   return (
     <>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
           <Button variant="default" className="gap-1">
             <MoreVertical className="h-4 -ml-2" />
             Actions
           </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-52 rounded-xl p-1" align="end">
-          <div className="flex flex-col">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="justify-start rounded-lg hover:bg-accent"
-              onClick={() => {
-                setOpen(false);
-                setIsAddOpen(true);
-              }}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-52" align="end">
+          <DropdownMenuItem onSelect={() => setIsAddOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Add contacts
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setIsBulkUploadOpen(true)}>
+            <Upload className="h-4 w-4" />
+            Bulk upload
+          </DropdownMenuItem>
+          {contactBookName ? (
+            <DropdownMenuItem onSelect={() => setIsEditOpen(true)}>
+              <Edit className="h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+          ) : null}
+          {contactBookName ? (
+            <DropdownMenuItem
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+              onSelect={() => setIsDeleteOpen(true)}
             >
-              <Plus className="mr-2 h-4 w-4" />
-              Add contacts
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="justify-start rounded-lg hover:bg-accent"
-              onClick={() => {
-                setOpen(false);
-                setIsBulkUploadOpen(true);
-              }}
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Bulk upload
-            </Button>
-            {contactBookName ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="justify-start rounded-lg hover:bg-accent"
-                onClick={() => {
-                  setOpen(false);
-                  setIsEditOpen(true);
-                }}
-              >
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
-            ) : null}
-            {contactBookName ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="justify-start rounded-lg text-red/80 hover:bg-accent hover:text-red"
-                onClick={() => {
-                  setOpen(false);
-                  setIsDeleteOpen(true);
-                }}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </Button>
-            ) : null}
-          </div>
-        </PopoverContent>
-      </Popover>
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       <AddContact
         contactBookId={contactBookId}
@@ -414,7 +384,6 @@ export default function ContactsPage({
                     doubleOptInEnabled: checked,
                   });
                 }}
-                className="data-[state=checked]:bg-green-500"
               />
             </div>
           </CardHeader>

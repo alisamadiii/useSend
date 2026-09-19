@@ -427,7 +427,7 @@ export default function BulkUploadContacts({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Tabs defaultValue="text" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="file">
                 <Upload className="h-4 w-4 mr-2" />
                 File Upload
@@ -480,11 +480,6 @@ Format: email,firstName,lastName,subscribed (all fields except email are optiona
                     disabled={processing}
                   />
                   <div className="text-center">
-                    <Upload
-                      className={`mx-auto h-12 w-12 ${
-                        isDragOver ? "text-primary" : "text-muted-foreground"
-                      }`}
-                    />
                     <div className="mt-2">
                       <Button
                         type="button"

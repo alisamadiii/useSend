@@ -16,6 +16,7 @@ import { extensions } from "./extensions";
 import LinkMenu from "./menus/LinkMenu";
 import { Content, Editor as TipTapEditor } from "@tiptap/core";
 import { UploadFn } from "./extensions/ImageExtension";
+import { type SlashCommandItem } from "./extensions/SlashCommand";
 
 const content = `<h2>Hello World!</h2>
 
@@ -70,6 +71,7 @@ export type EditorProps = {
   variables?: Array<string>;
   uploadImage?: UploadFn;
   variableSuggestionsHelperText?: string;
+  slashCommands?: SlashCommandItem[];
 };
 
 export const Editor: React.FC<EditorProps> = ({
@@ -78,6 +80,7 @@ export const Editor: React.FC<EditorProps> = ({
   variables,
   uploadImage,
   variableSuggestionsHelperText,
+  slashCommands,
 }) => {
   const menuContainerRef = useRef(null);
 
@@ -102,6 +105,7 @@ export const Editor: React.FC<EditorProps> = ({
       variables,
       uploadImage,
       variableSuggestionsHelperText,
+      slashCommands,
     }),
     onUpdate: ({ editor }) => {
       onUpdate?.(editor);

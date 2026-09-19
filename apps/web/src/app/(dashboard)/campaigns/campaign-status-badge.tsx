@@ -24,7 +24,10 @@ export default function CampaignStatusBadge({
   };
 
   return (
-    <Badge variant={getVariant(status)} className="min-w-[100px] capitalize">
+    <Badge
+      variant={getVariant(status)}
+      className="min-w-[100px] justify-center text-center capitalize"
+    >
       {status.toLowerCase()}
     </Badge>
   );

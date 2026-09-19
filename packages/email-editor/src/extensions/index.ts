@@ -12,7 +12,11 @@ import TaskList from "@tiptap/extension-task-list";
 import Placeholder from "@tiptap/extension-placeholder";
 import GlobalDragHandle from "./dragHandle";
 import { ButtonExtension } from "./ButtonExtension";
-import { SlashCommand, getSlashCommandSuggestions } from "./SlashCommand";
+import {
+  SlashCommand,
+  getSlashCommandSuggestions,
+  type SlashCommandItem,
+} from "./SlashCommand";
 import { VariableExtension } from "./VariableExtension";
 import { getVariableSuggestions } from "../nodes/variable";
 import { UnsubscribeFooterExtension } from "./UnsubsubscribeExtension";
@@ -22,10 +26,12 @@ export function extensions({
   variables,
   uploadImage,
   variableSuggestionsHelperText,
+  slashCommands,
 }: {
   variables?: Array<string>;
   uploadImage?: UploadFn;
   variableSuggestionsHelperText?: string;
+  slashCommands?: SlashCommandItem[];
 }) {
   const extensions = [
     StarterKit.configure({
@@ -72,7 +78,7 @@ export function extensions({
     TaskItem,
     TaskList,
     SlashCommand.configure({
-      suggestion: getSlashCommandSuggestions([], uploadImage),
+      suggestion: getSlashCommandSuggestions(slashCommands ?? [], uploadImage),
       uploadImage,
     }),
     Placeholder.configure({

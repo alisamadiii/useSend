@@ -5,6 +5,7 @@ import {
   TooltipTrigger,
 } from "@usesend/ui/src/tooltip";
 import { Card } from "@usesend/ui/src/card";
+import { Badge } from "@usesend/ui/src/badge";
 import {
   CheckCircle2,
   CheckCircle2Icon,
@@ -91,32 +92,28 @@ export function ReputationMetrics({ days, domain }: ReputationMetricsProps) {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col sm:flex-row gap-10 w-full">
-        <Card className="w-full sm:w-1/2 p-4">
-          <div className="flex justify-between">
-            <div className=" flex items-center gap-2">
-              <div className="text-muted-foreground font-mono">Bounce Rate</div>
-              <Tooltip>
-                <TooltipTrigger>
-                  <InfoIcon className=" h-3.5  w-3.5 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent className="w-[300px]">
-                  The percentage of emails sent from your account that resulted
-                  in a hard bounce.
-                </TooltipContent>
-              </Tooltip>
+      <div className="flex flex-col sm:flex-row gap-5 w-full">
+        <Card className="w-full sm:w-1/2 p-6">
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-medium text-muted-foreground">
+              Bounce Rate
             </div>
-            <div></div>
+            <Tooltip>
+              <TooltipTrigger>
+                <InfoIcon className=" h-3.5  w-3.5 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent className="w-[300px]">
+                The percentage of emails sent from your account that resulted
+                in a hard bounce.
+              </TooltipContent>
+            </Tooltip>
           </div>
-          <div className="flex items-baseline gap-4">
-            <div className="text-2xl mt-2 font-mono">
+          <div className="flex items-baseline gap-3">
+            <div className="mt-2 text-3xl font-semibold tracking-tight">
               {metrics?.bounceRate.toFixed(2)}%
             </div>
             <StatusBadge status={bounceStatus} />
           </div>
-          {/* <div className="flex">
-            <StatusBadge status={ACCOUNT_STATUS.HEALTHY} />
-          </div> */}
           <ResponsiveContainer width="100%" height={200}>
             <BarChart
               // width={350}
@@ -186,19 +183,19 @@ export function ReputationMetrics({ days, domain }: ReputationMetricsProps) {
                   if (!data) return null;
 
                   return (
-                    <div className="bg-background border shadow-lg p-2 rounded-xl flex flex-col gap-2 px-4">
+                    <div className="bg-background/80 backdrop-blur-md ring-1 ring-foreground/10 shadow-lg p-2 rounded-xl flex flex-col gap-2 px-4">
                       <p className="text-sm text-muted-foreground">
                         {data.name}
                       </p>
                       <div className="flex gap-2 items-center">
                         <div
                           className="w-2.5 h-2.5 rounded-[2px]"
-                          style={{ background: colors.clicked }}
+                          style={{ background: colors.rate }}
                         ></div>
                         <p className="text-xs text-muted-foreground w-[70px]">
                           Current
                         </p>
-                        <p className="text-xs font-mono">
+                        <p className="text-xs font-medium">
                           {data.value.toFixed(2)}%
                         </p>
                       </div>
@@ -210,7 +207,7 @@ export function ReputationMetrics({ days, domain }: ReputationMetricsProps) {
                         <p className="text-xs text-muted-foreground w-[70px]">
                           Warning at
                         </p>
-                        <p className="text-xs font-mono">
+                        <p className="text-xs font-medium">
                           {HARD_BOUNCE_WARNING_RATE}%
                         </p>
                       </div>
@@ -222,7 +219,7 @@ export function ReputationMetrics({ days, domain }: ReputationMetricsProps) {
                         <p className="text-xs text-muted-foreground w-[70px]">
                           Risk at
                         </p>
-                        <p className="text-xs font-mono">
+                        <p className="text-xs font-medium">
                           {HARD_BOUNCE_RISK_RATE}%
                         </p>
                       </div>
@@ -235,15 +232,15 @@ export function ReputationMetrics({ days, domain }: ReputationMetricsProps) {
                 barSize={150}
                 dataKey="value"
                 stackId="a"
-                fill={colors.clicked}
+                fill={colors.rate}
                 radius={[8, 8, 0, 0]}
               />
             </BarChart>
           </ResponsiveContainer>
         </Card>
-        <Card className="w-full sm:w-1/2 p-4">
+        <Card className="w-full sm:w-1/2 p-6">
           <div className=" flex items-center gap-2">
-            <div className=" text-muted-foreground font-mono">
+            <div className="text-sm font-medium text-muted-foreground">
               Complaint Rate
             </div>
             <Tooltip>
@@ -256,8 +253,8 @@ export function ReputationMetrics({ days, domain }: ReputationMetricsProps) {
               </TooltipContent>
             </Tooltip>
           </div>
-          <div className="flex items-baseline gap-4">
-            <div className="text-2xl mt-2 font-mono">
+          <div className="flex items-baseline gap-3">
+            <div className="mt-2 text-3xl font-semibold tracking-tight">
               {metrics?.complaintRate.toFixed(2)}%
             </div>
             <StatusBadge status={complaintStatus} />
@@ -325,19 +322,19 @@ export function ReputationMetrics({ days, domain }: ReputationMetricsProps) {
                   if (!data) return null;
 
                   return (
-                    <div className="bg-background border shadow-lg p-2 rounded-xl flex flex-col gap-2 px-4">
+                    <div className="bg-background/80 backdrop-blur-md ring-1 ring-foreground/10 shadow-lg p-2 rounded-xl flex flex-col gap-2 px-4">
                       <p className="text-sm text-muted-foreground">
                         {data.name}
                       </p>
                       <div className="flex gap-2 items-center">
                         <div
                           className="w-2.5 h-2.5 rounded-[2px]"
-                          style={{ background: colors.clicked }}
+                          style={{ background: colors.rate }}
                         ></div>
                         <p className="text-xs text-muted-foreground w-[70px]">
                           Current
                         </p>
-                        <p className="text-xs font-mono">
+                        <p className="text-xs font-medium">
                           {data.value.toFixed(2)}%
                         </p>
                       </div>
@@ -349,7 +346,7 @@ export function ReputationMetrics({ days, domain }: ReputationMetricsProps) {
                         <p className="text-xs text-muted-foreground w-[70px]">
                           Warning at
                         </p>
-                        <p className="text-xs font-mono">
+                        <p className="text-xs font-medium">
                           {COMPLAINED_WARNING_RATE}%
                         </p>
                       </div>
@@ -361,7 +358,7 @@ export function ReputationMetrics({ days, domain }: ReputationMetricsProps) {
                         <p className="text-xs text-muted-foreground w-[70px]">
                           Risk at
                         </p>
-                        <p className="text-xs font-mono">
+                        <p className="text-xs font-medium">
                           {COMPLAINED_RISK_RATE}%
                         </p>
                       </div>
@@ -374,7 +371,7 @@ export function ReputationMetrics({ days, domain }: ReputationMetricsProps) {
                 barSize={150}
                 dataKey="value"
                 stackId="a"
-                fill={colors.clicked}
+                fill={colors.rate}
                 radius={[8, 8, 0, 0]}
               />
             </BarChart>
@@ -388,12 +385,8 @@ export function ReputationMetrics({ days, domain }: ReputationMetricsProps) {
 export const StatusBadge: React.FC<{ status: ACCOUNT_STATUS }> = ({
   status,
 }) => {
-  const className =
-    status === "HEALTHY"
-      ? " text-success border-success"
-      : status === "WARNING"
-        ? " text-warning border-warning"
-        : " text-destructive border-destructive";
+  const variant =
+    status === "HEALTHY" ? "success" : status === "WARNING" ? "warning" : "error";
 
   const StatusIcon =
     status === "HEALTHY"
@@ -403,11 +396,9 @@ export const StatusBadge: React.FC<{ status: ACCOUNT_STATUS }> = ({
         : OctagonAlertIcon;
 
   return (
-    <div
-      className={` capitalize text-xs ${className} flex gap-1 items-center   rounded-lg`}
-    >
+    <Badge variant={variant} className="capitalize">
       <StatusIcon className="h-3.5 w-3.5" />
       {status.toLowerCase()}
-    </div>
+    </Badge>
   );
 };

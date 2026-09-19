@@ -7,7 +7,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { SuppressionReason } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@usesend/ui/src/button";
-import { Card } from "@usesend/ui/src/card";
+import { Badge } from "@usesend/ui/src/badge";
 import { Input } from "@usesend/ui/src/input";
 import {
   Select,
@@ -146,14 +146,14 @@ export default function SuppressionList() {
       </div>
 
       {/* Table */}
-      <Card className="flex flex-col overflow-hidden">
+      <div className="flex flex-col">
         <Table className="">
           <TableHeader className="">
             <TableRow className="">
               <TableHead className="">Email</TableHead>
               <TableHead>Reason</TableHead>
               <TableHead>Added</TableHead>
-              <TableHead className="">Actions</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -179,17 +179,18 @@ export default function SuppressionList() {
                     {suppression.email}
                   </TableCell>
                   <TableCell>
-                    <div
-                      className={`text-center w-[130px] rounded capitalize py-1 text-xs ${
+                    <Badge
+                      variant={
                         suppression.reason === "HARD_BOUNCE"
-                          ? "bg-red/15 text-red border border-red/20"
+                          ? "error"
                           : suppression.reason === "COMPLAINT"
-                            ? "bg-yellow/15 text-yellow border border-yellow/20"
-                            : "bg-blue/15 text-blue border border-blue/20"
-                      }`}
+                            ? "warning"
+                            : "info"
+                      }
+                      className="min-w-[100px] capitalize"
                     >
                       {reasonLabels[suppression.reason]}
-                    </div>
+                    </Badge>
                   </TableCell>
 
                   <TableCell className="text-muted-foreground">
@@ -197,7 +198,7 @@ export default function SuppressionList() {
                       addSuffix: true,
                     })}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-right">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -212,7 +213,7 @@ export default function SuppressionList() {
             )}
           </TableBody>
         </Table>
-      </Card>
+      </div>
 
       {/* Pagination */}
       <div className="flex gap-4 justify-end">

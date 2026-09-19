@@ -96,11 +96,9 @@ export default function EmailChart({ days, domain }: EmailChartProps) {
   return (
     <div className="flex flex-col gap-16">
       {!statusQuery.isLoading && statusQuery.data ? (
-        <Card className="w-full h-[450px] p-4">
-          <div className="p-2 overflow-x-auto">
-            {/* <div className="mb-4 text-sm">Emails</div> */}
-
-            <div className="flex gap-10">
+        <Card className="w-full p-6 pb-8">
+          <div className="overflow-x-auto">
+            <div className="flex flex-wrap gap-x-10 gap-y-4">
               <EmailChartItem
                 status={"total"}
                 count={statusQuery.data.totalCounts.sent}
@@ -175,7 +173,7 @@ export default function EmailChart({ days, domain }: EmailChartProps) {
               />
             </div>
           </div>
-          <ResponsiveContainer width="100%" height="80%">
+          <ResponsiveContainer width="100%" height={340}>
             <BarChart
               width={900}
               height={200}
@@ -187,10 +185,14 @@ export default function EmailChart({ days, domain }: EmailChartProps) {
                 bottom: 5,
               }}
             >
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="3 3"
+                stroke={`${currentColors.xaxis}50`}
+              />
               <XAxis
                 dataKey="date"
                 fontSize={12}
-                className="font-mono"
                 stroke={currentColors.xaxis}
                 tick={{ fill: currentColors.xaxis, fillOpacity: 0.65 }}
                 axisLine={false}
@@ -222,7 +224,7 @@ export default function EmailChart({ days, domain }: EmailChartProps) {
                   if (!hasAnyData) return null;
 
                   return (
-                    <div className=" bg-background border shadow-lg p-2 rounded-xl flex flex-col gap-2 px-4">
+                    <div className=" bg-background/80 backdrop-blur-md ring-1 ring-foreground/10 shadow-lg p-2 rounded-xl flex flex-col gap-2 px-4">
                       <p className="text-sm text-muted-foreground">
                         {data.date}
                       </p>
@@ -244,7 +246,9 @@ export default function EmailChart({ days, domain }: EmailChartProps) {
                             <p className="text-xs text-muted-foreground w-[70px]">
                               {metricMeta[metricKey].label}
                             </p>
-                            <p className="text-xs font-mono">{metricValue}</p>
+                            <p className="text-xs font-medium">
+                              {metricValue}
+                            </p>
                           </div>
                         );
                       })}
@@ -341,30 +345,30 @@ const EmailChartItem: React.FC<DashboardItemCardProps> = ({
       onClick={onClick}
       disabled={!isClickable}
       aria-pressed={isClickable ? isActive : undefined}
-      className={`flex gap-3 items-stretch font-mono transition-opacity ${
+      className={`flex gap-3 items-stretch text-left transition-opacity ${
         isClickable ? "cursor-pointer" : "cursor-default"
       } ${isActive ? "opacity-100" : "opacity-45 hover:opacity-100"} ${
         isClickable ? "" : "pointer-events-none"
       }`}
     >
       <div>
-        <div className=" flex  items-center gap-2">
+        <div className="flex items-center gap-2">
           <div
-            className="w-2.5 h-2.5 rounded-[3px]"
+            className="w-2.5 h-2.5 rounded-full"
             style={{ backgroundColor: getColorForStatus(status) }}
           ></div>
 
-          <div className="text-xs uppercase text-muted-foreground ">
+          <div className="text-xs capitalize text-muted-foreground">
             {status.toLowerCase()}
           </div>
         </div>
-        <div className="mt-1 -ml-0.5 ">
-          <span className="text-xl font-mono">{count}</span>
-          <span className="text-xs ml-2 font-mono">
-            {status !== "total" && isFinite(percentage)
-              ? `(${count > 0 ? (percentage * 100).toFixed(0) : 0}%)`
-              : null}
-          </span>
+        <div className="mt-1 flex items-baseline gap-1.5">
+          <span className="text-xl font-semibold tracking-tight">{count}</span>
+          {status !== "total" && isFinite(percentage) ? (
+            <span className="text-xs text-muted-foreground">
+              {count > 0 ? (percentage * 100).toFixed(0) : 0}%
+            </span>
+          ) : null}
         </div>
       </div>
     </button>

@@ -197,7 +197,6 @@ export const EditContact: React.FC<{
                       <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        className="data-[state=checked]:bg-success"
                       />
                     </FormControl>
                   </FormItem>

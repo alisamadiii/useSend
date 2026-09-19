@@ -10,7 +10,9 @@ import { Trash2 } from "lucide-react";
 
 export const DeleteWebhook: React.FC<{
   webhook: Webhook;
-}> = ({ webhook }) => {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}> = ({ webhook, open, onOpenChange }) => {
   const deleteWebhookMutation = api.webhook.delete.useMutation();
   const utils = api.useUtils();
 
@@ -46,15 +48,19 @@ export const DeleteWebhook: React.FC<{
       isLoading={deleteWebhookMutation.isPending}
       onConfirm={onConfirm}
       confirmLabel="Delete webhook"
+      open={open}
+      onOpenChange={onOpenChange}
       trigger={
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start rounded-lg text-red/80 hover:bg-accent hover:text-red"
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          Delete
-        </Button>
+        onOpenChange ? undefined : (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start rounded-lg text-red/80 hover:bg-accent hover:text-red"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </Button>
+        )
       }
     />
   );

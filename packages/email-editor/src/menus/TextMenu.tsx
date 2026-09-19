@@ -295,7 +295,7 @@ export function TextMenu(props: TextMenuProps) {
   return (
     <BubbleMenu
       {...bubbleMenuProps}
-      className="flex gap-1 rounded-md border border-gray-200 bg-white shadow-md items-center"
+      className="flex items-center gap-0.5 rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10"
     >
       <ContentTypePicker options={contentTypePickerOptions} />
       <EditLinkPopover
@@ -309,35 +309,35 @@ export function TextMenu(props: TextMenuProps) {
           // editor?.commands.blur();
         }}
       />
-      <Separator orientation="vertical" className="h-6 bg-slate-300" />
+      <Separator orientation="vertical" className="h-5 bg-border" />
       {items.map((item, index) => (
         <TextMenuButton key={index} {...item} />
       ))}
-      <Separator orientation="vertical" className="h-6 bg-slate-300" />
+      <Separator orientation="vertical" className="h-5 bg-border" />
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
-            className="hover:bg-slate-100 hover:text-slate-900"
+            className="hover:bg-accent hover:text-accent-foreground"
           >
             <span style={{ color: selectedColor }}>A</span>
-            <ChevronDown className="h-4 w-4 ml-1.5 text-gray-800" />
+            <ChevronDown className="h-4 w-4 ml-1.5 text-muted-foreground" />
           </Button>
         </PopoverTrigger>
         <PopoverContent
           side="bottom"
           align="start"
-          className="bg-white text-slate-900 w-52 px-1 border border-gray-200"
+          className="w-52 p-1"
           sideOffset={16}
         >
           {textColors.map((color) => (
             <button
               key={color.value}
               onClick={() => editor?.chain().setColor(color.value).run()}
-              className={`flex gap-2 items-center p-1 px-2 w-full ${
+              className={`flex gap-2 items-center rounded-md p-1 px-2 w-full text-sm hover:bg-accent ${
                 selectedColor === color.value ||
                 (selectedColor === undefined && color.value === "#000000")
-                  ? "bg-gray-200 rounded-md"
+                  ? "bg-accent rounded-md"
                   : ""
               }`}
             >
@@ -366,16 +366,16 @@ function ContentTypePicker({ options }: ContentTypePickerProps) {
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="hover:bg-slate-100  hover:text-slate-600 text-slate-600 px-2"
+          className="px-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         >
           <span>{activeOption?.label || "Text"}</span>
-          <ChevronDown className="h-4 w-4 ml-1.5 text-gray-800" />
+          <ChevronDown className="h-4 w-4 ml-1.5 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
         align="start"
-        className="bg-white border-gray-200 text-slate-900 w-52 px-1"
+        className="w-52 p-1"
         sideOffset={16}
       >
         {options.map((option) => (
@@ -384,8 +384,8 @@ function ContentTypePicker({ options }: ContentTypePickerProps) {
             onClick={() => {
               option.onClick();
             }}
-            className={`flex gap-2 items-center p-1 px-2 w-full ${
-              option.isActive() ? "bg-slate-100 rounded-md" : ""
+            className={`flex gap-2 items-center rounded-md p-1 px-2 w-full text-sm hover:bg-accent ${
+              option.isActive() ? "bg-accent rounded-md" : ""
             }`}
           >
             <option.icon className="h-3.5 w-3.5" />
@@ -407,16 +407,16 @@ function EditLinkPopover({ onSetLink }: EditLinkPopoverType) {
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="hover:bg-slate-100 hover:text-slate-600 text-slate-600 px-2"
+          className="px-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         >
           <span>Link</span>
-          <LinkIcon className="h-3.5 w-3.5 ml-1.5 text-gray-800" />
+          <LinkIcon className="h-3.5 w-3.5 ml-1.5 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
         align="start"
-        className="bg-white text-slate-900 px-1 w-[17rem] py-1 border border-gray-200"
+        className="w-[17rem] p-1"
         sideOffset={16}
       >
         <LinkEditorPanel onSetLink={onSetLink} />

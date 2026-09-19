@@ -10,8 +10,8 @@ export function TextMenuButton(item: TextMenuItem) {
       size="sm"
       onClick={item.command}
       className={cn(
-        "px-2.5 hover:bg-slate-100 hover:text-black",
-        item.isActive() ? "bg-slate-300" : ""
+        "px-2.5 hover:bg-accent hover:text-accent-foreground",
+        item.isActive() ? "bg-accent text-accent-foreground" : "",
       )}
       type="button"
     >
@@ -19,11 +19,13 @@ export function TextMenuButton(item: TextMenuItem) {
         <item.icon
           className={cn(
             "h-3.5 w-3.5",
-            item.isActive() ? "text-black" : "text-slate-700"
+            item.isActive() ? "text-foreground" : "text-muted-foreground",
           )}
         />
       ) : (
-        <span className="text-sm font-medium text-slate-700">{item.name}</span>
+        <span className="text-sm font-medium text-muted-foreground">
+          {item.name}
+        </span>
       )}
     </Button>
   );

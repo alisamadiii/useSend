@@ -6,3 +6,15 @@
 @source "../../../../packages/lib/src/**/*.{js,jsx,ts,tsx,mdx}";
 
 @import "@usesend/ui/styles/globals.css";
+
+/* Agency: email editor blends into the canvas; placeholder uses theme token */
+.unsend-editor {
+  background: transparent;
+  color: var(--foreground);
+  padding: 0;
+}
+
+.unsend-editor .ProseMirror .is-editor-empty:first-child::before,
+.unsend-editor .ProseMirror .is-empty::before {
+  color: color-mix(in oklab, var(--muted-foreground) 60%, transparent);
+}

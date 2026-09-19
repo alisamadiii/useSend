@@ -28,10 +28,12 @@ import { WebhookCallDetails } from "./webhook-call-details";
 import { DeleteWebhook } from "../delete-webhook";
 import { EditWebhookDialog } from "../webhook-update-dialog";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@usesend/ui/src/popover";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@usesend/ui/src/dropdown-menu";
+import { Trash2 } from "lucide-react";
 import { type Webhook } from "@prisma/client";
 
 function WebhookDetailActions({
@@ -54,84 +56,67 @@ function WebhookDetailActions({
   isRotating: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const isPaused = webhook.status === "PAUSED";
   const isAutoDisabled = webhook.status === "AUTO_DISABLED";
   const canActivate = isPaused || isAutoDisabled;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="default" className="gap-1">
-          <MoreVertical className="h-4 -ml-2" />
-          Actions
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-52 rounded-xl p-1" align="end">
-        <div className="flex flex-col">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="justify-start rounded-lg hover:bg-accent"
-            onClick={() => {
-              onTest();
-              setOpen(false);
-            }}
-            disabled={isTestPending}
-          >
-            <TestTube className="mr-2 h-4 w-4" />
+    <>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="default" className="gap-1">
+            <MoreVertical className="h-4 -ml-2" />
+            Actions
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-52" align="end">
+          <DropdownMenuItem disabled={isTestPending} onSelect={() => onTest()}>
+            <TestTube className="h-4 w-4" />
             Test webhook
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="justify-start rounded-lg hover:bg-accent"
-            onClick={() => {
-              onEdit();
-              setOpen(false);
-            }}
-          >
-            <Edit3 className="mr-2 h-4 w-4" />
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onEdit()}>
+            <Edit3 className="h-4 w-4" />
             Edit
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="justify-start rounded-lg hover:bg-accent"
-            onClick={() => {
-              onToggleStatus();
-              setOpen(false);
-            }}
+          </DropdownMenuItem>
+          <DropdownMenuItem
             disabled={isToggling}
+            onSelect={() => onToggleStatus()}
           >
             {canActivate ? (
               <>
-                <Play className="mr-2 h-4 w-4" />
+                <Play className="h-4 w-4" />
                 {isAutoDisabled ? "Re-enable" : "Resume"}
               </>
             ) : (
               <>
-                <Pause className="mr-2 h-4 w-4" />
+                <Pause className="h-4 w-4" />
                 Pause
               </>
             )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="justify-start rounded-lg hover:bg-accent"
-            onClick={() => {
-              onRotateSecret();
-              setOpen(false);
-            }}
+          </DropdownMenuItem>
+          <DropdownMenuItem
             disabled={isRotating}
+            onSelect={() => onRotateSecret()}
           >
-            <Key className="mr-2 h-4 w-4" />
+            <Key className="h-4 w-4" />
             Rotate secret
-          </Button>
-          <DeleteWebhook webhook={webhook} />
-        </div>
-      </PopoverContent>
-    </Popover>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+            onSelect={() => setIsDeleteOpen(true)}
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <DeleteWebhook
+        webhook={webhook}
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+      />
+    </>
   );
 }
 

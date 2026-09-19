@@ -17,6 +17,12 @@ import {
 import Spinner from "@usesend/ui/src/spinner";
 import { RowActions, RowActionItem } from "~/components/RowActions";
 import { Edit, Trash2 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@usesend/ui/src/tooltip";
 import { useUrlState } from "~/hooks/useUrlState";
 import { Input } from "@usesend/ui/src/input";
 import { useDebouncedCallback } from "use-debounce";
@@ -25,6 +31,8 @@ type ContactBook = {
   id: string;
   name: string;
   createdAt: Date;
+  doubleOptInEnabled?: boolean;
+  doubleOptInFrom?: string | null;
   _count: { contacts: number };
 };
 
@@ -94,12 +102,35 @@ function ContactBookRow({ contactBook }: { contactBook: ContactBook }) {
   const router = useRouter();
   const [action, setAction] = React.useState<"edit" | "delete" | null>(null);
 
+  const missingDoubleOptInFrom =
+    Boolean(contactBook.doubleOptInEnabled) && !contactBook.doubleOptInFrom;
+
   return (
     <TableRow
       className="cursor-pointer"
       onClick={() => router.push(`/contacts/${contactBook.id}`)}
     >
-      <TableCell className="font-medium">{contactBook.name}</TableCell>
+      <TableCell className="font-medium">
+        <div className="flex items-center gap-2">
+          {contactBook.name}
+          {missingDoubleOptInFrom ? (
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className="inline-block h-2 w-2 shrink-0 rounded-full bg-destructive"
+                    aria-label="Double opt-in misconfigured"
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  Double opt-in is enabled but no From address is set. Add a
+                  From address before using it.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : null}
+        </div>
+      </TableCell>
       <TableCell className="text-muted-foreground">
         <span className="font-mono">{contactBook._count.contacts}</span>
       </TableCell>

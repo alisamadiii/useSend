@@ -223,7 +223,6 @@ export default function ContactList({
             <Button
               onClick={handleExport}
               disabled={exportQuery.isFetching}
-              size="sm"
               variant="outline"
             >
               {exportQuery.isFetching ? (

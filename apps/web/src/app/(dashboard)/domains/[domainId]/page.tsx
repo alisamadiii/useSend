@@ -25,6 +25,7 @@ import { Switch } from "@usesend/ui/src/switch";
 import DeleteDomain from "./delete-domain";
 import SendTestMail from "./send-test-mail";
 import { Button } from "@usesend/ui/src/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@usesend/ui/src/card";
 import Link from "next/link";
 import { toast } from "@usesend/ui/src/toaster";
 import type { inferRouterOutputs } from "@trpc/server";
@@ -114,56 +115,62 @@ export default function DomainItemPage({
             </div>
           </div>
 
-          <div className=" bg-card shadow-card rounded-xl p-4">
-            <p className="font-semibold text-xl">DNS records</p>
-            <Table className="mt-2">
-              <TableHeader className="">
-                <TableRow className="">
-                  <TableHead className="rounded-tl-xl">Type</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Content</TableHead>
-                  <TableHead className="">TTL</TableHead>
-                  <TableHead className="">Priority</TableHead>
-                  <TableHead className="rounded-tr-xl">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {(domainQuery.data?.dnsRecords ?? []).map((record) => {
-                  const key = `${record.type}-${record.name}`;
-                  const valueClassName = record.name.includes("_domainkey")
-                    ? "w-[200px] overflow-hidden text-ellipsis"
-                    : "w-[200px] overflow-hidden text-ellipsis text-nowrap";
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">DNS records</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader className="">
+                  <TableRow className="">
+                    <TableHead className="rounded-tl-xl">Type</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Content</TableHead>
+                    <TableHead className="">TTL</TableHead>
+                    <TableHead className="">Priority</TableHead>
+                    <TableHead className="rounded-tr-xl">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(domainQuery.data?.dnsRecords ?? []).map((record) => {
+                    const key = `${record.type}-${record.name}`;
+                    const valueClassName = record.name.includes("_domainkey")
+                      ? "w-[200px] overflow-hidden text-ellipsis"
+                      : "w-[200px] overflow-hidden text-ellipsis text-nowrap";
 
-                  return (
-                    <TableRow key={key}>
-                      <TableCell className="">{record.type}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2 items-center">
-                          {record.recommended ? (
-                            <span className="text-sm text-muted-foreground">
-                              (recommended)
-                            </span>
-                          ) : null}
-                          <TextWithCopyButton value={record.name} />
-                        </div>
-                      </TableCell>
-                      <TableCell className="">
-                        <TextWithCopyButton
-                          value={record.value}
-                          className={valueClassName}
-                        />
-                      </TableCell>
-                      <TableCell className="">{record.ttl}</TableCell>
-                      <TableCell className="">{record.priority ?? ""}</TableCell>
-                      <TableCell className="">
-                        <DnsVerificationStatus status={record.status} />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                    return (
+                      <TableRow key={key}>
+                        <TableCell className="">{record.type}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2 items-center">
+                            {record.recommended ? (
+                              <span className="text-sm text-muted-foreground">
+                                (recommended)
+                              </span>
+                            ) : null}
+                            <TextWithCopyButton value={record.name} />
+                          </div>
+                        </TableCell>
+                        <TableCell className="">
+                          <TextWithCopyButton
+                            value={record.value}
+                            className={valueClassName}
+                          />
+                        </TableCell>
+                        <TableCell className="">{record.ttl}</TableCell>
+                        <TableCell className="">
+                          {record.priority ?? ""}
+                        </TableCell>
+                        <TableCell className="">
+                          <DnsVerificationStatus status={record.status} />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
           {domainQuery.data ? (
             <DomainSettings domain={domainQuery.data} />
           ) : null}
@@ -208,47 +215,51 @@ const DomainSettings: React.FC<{ domain: DomainResponse }> = ({ domain }) => {
     );
   }
   return (
-    <div className="rounded-lg shadow p-4 border flex flex-col gap-6">
-      <p className="font-semibold text-xl">Settings</p>
-      <div className="flex flex-col gap-1">
-        <div className="font-semibold">Click tracking</div>
-        <p className=" text-muted-foreground text-sm">
-          Track any links in your emails content.{" "}
-        </p>
-        <Switch
-          checked={clickTracking}
-          onCheckedChange={handleClickTrackingChange}
-          className="data-[state=checked]:bg-success"
-        />
-      </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xl">Settings</CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-6">
+        <div className="flex flex-col gap-1">
+          <div className="font-semibold">Click tracking</div>
+          <p className=" text-muted-foreground text-sm">
+            Track any links in your emails content.{" "}
+          </p>
+          <Switch
+            checked={clickTracking}
+            onCheckedChange={handleClickTrackingChange}
+          />
+        </div>
 
-      <div className="flex flex-col gap-1">
-        <div className="font-semibold">Open tracking</div>
-        <p className=" text-muted-foreground text-sm">
-          Unsend adds a tracking pixel to every email you send. This allows you
-          to see how many people open your emails. This will affect the delivery
-          rate of your emails.
-        </p>
-        <Switch
-          checked={openTracking}
-          onCheckedChange={handleOpenTrackingChange}
-          className="data-[state=checked]:bg-success"
-        />
-      </div>
+        <div className="flex flex-col gap-1">
+          <div className="font-semibold">Open tracking</div>
+          <p className=" text-muted-foreground text-sm">
+            Unsend adds a tracking pixel to every email you send. This allows
+            you to see how many people open your emails. This will affect the
+            delivery rate of your emails.
+          </p>
+          <Switch
+            checked={openTracking}
+            onCheckedChange={handleOpenTrackingChange}
+          />
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <p className="font-semibold text-lg text-destructive">Danger</p>
+        <div className="flex flex-col gap-2">
+          <p className="font-semibold text-lg text-destructive">Danger</p>
 
-        <p className="text-destructive text-sm font-semibold">
-          Deleting a domain will stop sending emails with this domain.
-        </p>
-        <DeleteDomain domain={domain} />
-      </div>
-    </div>
+          <p className="text-destructive text-sm font-semibold">
+            Deleting a domain will stop sending emails with this domain.
+          </p>
+          <DeleteDomain domain={domain} />
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
-const DnsVerificationStatus: React.FC<{ status: DomainStatus }> = ({ status }) => {
+const DnsVerificationStatus: React.FC<{ status: DomainStatus }> = ({
+  status,
+}) => {
   let badgeColor = "bg-gray/10 text-gray border-gray/10"; // Default color
   switch (status) {
     case DomainStatus.SUCCESS:
