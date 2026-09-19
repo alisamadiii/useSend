@@ -1,33 +1,25 @@
 name: Publish Docker
 
+# One image tag per branch, so every client instance stays isolated.
+#   agency branch          -> ghcr.io/alisamadiii/usesend:agency
+#   client/empowerher      -> ghcr.io/alisamadiii/usesend:client-empowerher
+# Each Coolify instance pins its own branch tag. Push the branch -> image rebuilds
+# under that same tag -> Redeploy in Coolify. No :latest, so builds never clobber.
+
 on:
   push:
-    tags:
-      - "*"
+    branches:
+      - agency
+      - "client/**"
   workflow_dispatch:
-    inputs:
-      branch:
-        description: "Branch to run the action on"
-        default: "agency"
-        required: true
 
 jobs:
   build_and_publish:
-    name: Build and publish images
+    name: Build and publish image
     runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        app:
-          - name: usesend
-            dockerfile: ./docker/Dockerfile
-            context: .
-          - name: smtp-proxy
-            dockerfile: ./apps/smtp-server/Dockerfile
-            context: ./apps/smtp-server
 
     steps:
       - uses: actions/checkout@v4
@@ -41,26 +33,23 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build the docker image
-        env:
-          APP: ${{ matrix.app.name }}
-          DOCKER_FILE: ${{ matrix.app.dockerfile }}
-          CONTEXT: ${{ matrix.app.context }}
+      - name: Build and push the docker image
         run: |
-          APP_VERSION="$(git name-rev --tags --name-only $(git rev-parse HEAD) | head -n 1 | sed 's/\^0//')"
-          GIT_SHA="$(git rev-parse HEAD)"
+          # Branch name -> a safe docker tag (client/empowerher -> client-empowerher)
+          BRANCH_TAG="$(echo "${GITHUB_REF_NAME}" | tr '/' '-')"
+          GIT_SHA="$(git rev-parse --short HEAD)"
+          IMAGE="ghcr.io/alisamadiii/usesend"
+
+          echo "Building ${IMAGE}:${BRANCH_TAG} (sha ${GIT_SHA})"
 
           docker build \
-            -f "$DOCKER_FILE" \
+            -f ./docker/Dockerfile \
             --progress=plain \
-            --build-arg APP_VERSION="$APP_VERSION" \
-            --build-arg GIT_SHA="$GIT_SHA" \
-            -t "ghcr.io/alisamadiii/$APP:latest" \
-            -t "ghcr.io/alisamadiii/$APP:$GIT_SHA" \
-            -t "ghcr.io/alisamadiii/$APP:$APP_VERSION" \
-            "$CONTEXT"
+            --build-arg APP_VERSION="${BRANCH_TAG}" \
+            --build-arg GIT_SHA="${GIT_SHA}" \
+            -t "${IMAGE}:${BRANCH_TAG}" \
+            -t "${IMAGE}:${BRANCH_TAG}-${GIT_SHA}" \
+            .
 
-      - name: Push the docker image to GitHub Container Registry
-        run: docker push --all-tags "ghcr.io/alisamadiii/$APP"
-        env:
-          APP: ${{ matrix.app.name }}
+          docker push "${IMAGE}:${BRANCH_TAG}"
+          docker push "${IMAGE}:${BRANCH_TAG}-${GIT_SHA}"
