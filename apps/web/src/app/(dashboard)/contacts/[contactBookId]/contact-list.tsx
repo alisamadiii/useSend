@@ -306,7 +306,7 @@ function ContactRow({
   doubleOptInEnabled,
   contactBookVariables,
 }: {
-  contact: Contact;
+  contact: Omit<Contact, "updatedAt">;
   contactBookId: string;
   doubleOptInEnabled?: boolean;
   contactBookVariables?: string[];
