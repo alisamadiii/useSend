@@ -14,11 +14,13 @@ Upstream update flow:
 ```sh
 git fetch upstream
 git checkout main && git merge --ff-only upstream/main
-git checkout agency && git merge main   # resolve, smoke test, then tag
+git checkout agency && git merge main   # resolve, smoke test, push
 ```
 
-Tags follow `v<upstream-version>-agency.<n>`; a tag push triggers the Docker publish
-workflow to `ghcr.io/alisamadiii/usesend`.
+Deploy: push `agency` -> Coolify (git source, Docker Compose build pack,
+`coolify.compose.yml`) builds `docker/Dockerfile` on the VPS and redeploys. No
+GitHub Actions, no ghcr image. Upstream's `.github/workflows/publish.yml` is
+deleted on this branch; on merge conflicts there, keep it deleted (`git rm`).
 
 ## Hard rules
 
@@ -30,7 +32,7 @@ workflow to `ghcr.io/alisamadiii/usesend`.
 - No file renames/moves, no formatting-only diffs, no dependency bumps upstream
   doesn't have. Keep every diff small and surgical so merges stay trivial.
 - Tailwind classes stay inline on elements — never hoist class strings into consts.
-- After every upstream merge: `pnpm build` + click-through smoke test before tagging.
+- After every upstream merge: `pnpm build` + click-through smoke test before pushing.
 
 ## What this fork changes
 
@@ -40,6 +42,7 @@ workflow to `ghcr.io/alisamadiii/usesend`.
 - Brand assets: `apps/web/public/logo-squircle.png`, `favicon.ico`, `favicon_io/*`.
 - Brand strings: `apps/web/src/app/layout.tsx` metadata, `AppSideBar` wordmark,
   login page copy, unsubscribe footer.
-- `.github/workflows/publish.yml` — free runners, ghcr only.
+- `coolify.compose.yml` — Coolify build-from-source deploy (replaces upstream's
+  `.github/workflows/publish.yml`, removed here).
 - Email templates under `apps/web/src/server/email-templates` still say "useSend"
   (left untouched to honor the no-server-edits rule; revisit deliberately if needed).
