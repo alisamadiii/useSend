@@ -32,6 +32,8 @@ import emailTimeSeries from "./api/analytics/email-time-series";
 import reputationMetricsData from "./api/analytics/reputation-metrics-data";
 import bulkAddContactsHandle from "./api/contacts/bulk-add-contacts";
 import bulkDeleteContacts from "./api/contacts/bulk-delete-contacts";
+import createWorkspace from "./api/workspaces/create-workspace";
+import getWorkspace from "./api/workspaces/get-workspace";
 
 
 export const app = getApp();
@@ -80,5 +82,9 @@ deleteCampaignHandle(app);
 /**Analytics related APIs */
 emailTimeSeries(app);
 reputationMetricsData(app);
+
+/**Workspace provisioning APIs (instance-admin auth, not team-scoped) */
+createWorkspace(app);
+getWorkspace(app);
 
 export default app;

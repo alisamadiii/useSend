@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 import {
   createTRPCRouter,
@@ -17,6 +18,14 @@ export const teamRouter = createTRPCRouter({
 
   getTeams: protectedProcedure.query(async ({ ctx }) => {
     return TeamService.getUserTeams(ctx.session.user.id);
+  }),
+
+  // Admin-only: list every workspace (team) so an admin can switch between them.
+  getAllTeams: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.session.user.isAdmin) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+    return TeamService.getAllTeams();
   }),
 
   getTeamUsers: teamProcedure.query(async ({ ctx }) => {

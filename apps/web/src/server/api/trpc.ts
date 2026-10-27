@@ -16,6 +16,8 @@ import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
 import { getChildLogger, logger, withLogger } from "../logger/log";
 import { randomUUID } from "crypto";
+import { TeamService } from "~/server/service/team-service";
+import { parseActiveTeamCookie } from "~/lib/constants/cookies";
 
 /**
  * 1. CONTEXT
@@ -125,25 +127,27 @@ export const protectedProcedure = authedProcedure.use(({ ctx, next }) => {
 });
 
 export const teamProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const teamUser = await db.teamUser.findFirst({
-    where: { userId: ctx.session.user.id },
-    include: { team: true },
-  });
+  const selectedTeamId = parseActiveTeamCookie(ctx.headers.get("cookie"));
+  const resolved = await TeamService.resolveTeamContext(
+    ctx.session.user.id,
+    Boolean(ctx.session.user.isAdmin),
+    selectedTeamId
+  );
 
-  if (!teamUser) {
+  if (!resolved) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Team not found" });
   }
 
   return withLogger(
     getChildLogger({
-      teamId: teamUser.team.id,
+      teamId: resolved.team.id,
       requestId: randomUUID(),
     }),
     async () => {
       return next({
         ctx: {
-          team: teamUser.team,
-          teamUser,
+          team: resolved.team,
+          teamUser: resolved.teamUser,
           session: { ...ctx.session, user: ctx.session.user },
         },
       });

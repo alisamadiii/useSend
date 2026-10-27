@@ -27,7 +27,10 @@ export function getApp() {
     if (
       c.req.path.startsWith("/api/v1/doc") ||
       c.req.path.startsWith("/api/v1/ui") ||
-      c.req.path === "/api/health"
+      c.req.path === "/api/health" ||
+      // Workspace provisioning has no team yet — it authenticates with the instance
+      // admin key inside the route handler, so skip the team-token resolution here.
+      c.req.path.startsWith("/api/v1/workspaces")
     ) {
       return next();
     }

@@ -3,7 +3,7 @@ import { env } from "~/env";
 import { db } from "~/server/db";
 import { sendMail, sendTeamInviteEmail } from "~/server/mailer";
 import { logger } from "~/server/logger/log";
-import type { Prisma, Team, TeamInvite } from "@prisma/client";
+import type { Prisma, Team, TeamInvite, TeamUser } from "@prisma/client";
 import { UnsendApiError } from "../public-api/api-error";
 import { getRedis, redisKey } from "~/server/redis";
 import { LimitReason } from "~/lib/constants/plans";
@@ -71,15 +71,9 @@ export class TeamService {
       return;
     }
 
-    if (!env.NEXT_PUBLIC_IS_CLOUD) {
-      const _team = await db.team.findFirst();
-      if (_team) {
-        throw new TRPCError({
-          message: "Can't have multiple teams in self hosted version",
-          code: "UNAUTHORIZED",
-        });
-      }
-    }
+    // NOTE: the agency fork runs self-hosted with many client workspaces (teams),
+    // one per client-hub project. The upstream "single team on self-hosted" guard is
+    // intentionally removed here so admins can own/create multiple teams.
 
     const created = await db.team.create({
       data: {
@@ -95,6 +89,81 @@ export class TeamService {
     // Warm cache for the new team
     await TeamService.refreshTeamCache(created.id);
     return created;
+  }
+
+  /**
+   * Create a workspace (team) provisioned by an external system (client-hub) via the
+   * public API. No TeamUser is attached — these teams are machine-owned and accessed
+   * through a per-team API key and/or the admin workspace switcher.
+   * `externalId` stores the client-hub repo_id so the two map 1:1.
+   */
+  static async createTeamForExternal({
+    name,
+    externalId,
+  }: {
+    name: string;
+    externalId: string;
+  }): Promise<Team> {
+    const created = await db.team.create({
+      data: { name, externalId },
+    });
+    await TeamService.refreshTeamCache(created.id);
+    return created;
+  }
+
+  /**
+   * All teams, newest first. Used by the admin workspace switcher.
+   */
+  static async getAllTeams() {
+    return db.team.findMany({ orderBy: { createdAt: "desc" } });
+  }
+
+  /**
+   * Resolve the active team for a request.
+   * - If a selected team id is provided (from the active-team cookie) and the user is a
+   *   member of it, use that team.
+   * - If the user is an admin, they may select any team (a synthetic ADMIN teamUser is
+   *   returned so admin-gated procedures keep working).
+   * - Otherwise fall back to the user's first team membership.
+   * The cookie is never trusted for authorization — access is always re-checked here.
+   */
+  static async resolveTeamContext(
+    userId: number,
+    isAdmin: boolean,
+    selectedTeamId?: number | null,
+  ): Promise<{ team: Team; teamUser: TeamUser & { team: Team } } | null> {
+    if (selectedTeamId != null) {
+      const membership = await db.teamUser.findFirst({
+        where: { teamId: selectedTeamId, userId },
+        include: { team: true },
+      });
+      if (membership) {
+        return { team: membership.team, teamUser: membership };
+      }
+
+      if (isAdmin) {
+        const team = await db.team.findUnique({
+          where: { id: selectedTeamId },
+        });
+        if (team) {
+          return {
+            team,
+            teamUser: { teamId: team.id, userId, role: "ADMIN", team },
+          };
+        }
+      }
+      // Selected team not accessible — fall through to the default team.
+    }
+
+    const first = await db.teamUser.findFirst({
+      where: { userId },
+      include: { team: true },
+    });
+    if (first) {
+      return { team: first.team, teamUser: first };
+    }
+
+    return null;
   }
 
   /**

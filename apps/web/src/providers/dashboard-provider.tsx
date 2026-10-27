@@ -14,7 +14,12 @@ export const DashboardProvider = ({
   children: React.ReactNode;
 }) => {
   const { data: session } = useSession();
+  const isAdmin = Boolean(session?.user.isAdmin);
   const { data: teams, status } = api.team.getTeams.useQuery();
+  // Admins oversee every workspace, so they can enter the dashboard even with no
+  // membership of their own as long as at least one workspace exists.
+  const { data: allTeams, status: allTeamsStatus } =
+    api.team.getAllTeams.useQuery(undefined, { enabled: isAdmin });
   const { data: settings, status: settingsStatus } =
     api.admin.getSesSettings.useQuery(undefined, {
       enabled: !env.NEXT_PUBLIC_IS_CLOUD || session?.user.isAdmin,
@@ -22,6 +27,7 @@ export const DashboardProvider = ({
 
   if (
     status === "pending" ||
+    (isAdmin && allTeamsStatus === "pending") ||
     (settingsStatus === "pending" && !env.NEXT_PUBLIC_IS_CLOUD)
   ) {
     return <FullScreenLoading />;
@@ -34,7 +40,10 @@ export const DashboardProvider = ({
     return <AddSesSettings />;
   }
 
-  if (!teams || teams.length === 0) {
+  const hasTeam =
+    (teams && teams.length > 0) || (isAdmin && (allTeams?.length ?? 0) > 0);
+
+  if (!hasTeam) {
     return <CreateTeam />;
   }
 

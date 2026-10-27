@@ -49,6 +49,7 @@ import {
   DropdownMenuTrigger,
 } from "@usesend/ui/src/dropdown-menu";
 import { FeedbackDialog } from "./FeedbackDialog";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { env } from "~/env";
 
 // General items
@@ -142,6 +143,7 @@ export function AppSidebar() {
             </span>
           </div>
         </SidebarGroupLabel>
+        <WorkspaceSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
