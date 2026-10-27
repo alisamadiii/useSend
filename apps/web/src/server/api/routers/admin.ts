@@ -490,4 +490,57 @@ export const adminRouter = createTRPCRouter({
         periodStart: timeframe === "today" ? today : monthStart,
       };
     }),
+
+  listDomains: adminProcedure.query(async () => {
+    return db.domain.findMany({
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        region: true,
+        createdAt: true,
+        teamId: true,
+        team: { select: { id: true, name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }),
+
+  reassignDomain: adminProcedure
+    .input(
+      z.object({
+        domainId: z.number(),
+        teamId: z.number(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      const team = await db.team.findUnique({ where: { id: input.teamId } });
+
+      if (!team) {
+        throw new Error("Team not found");
+      }
+
+      const domain = await db.domain.update({
+        where: { id: input.domainId },
+        data: { teamId: input.teamId },
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          region: true,
+          createdAt: true,
+          teamId: true,
+          team: { select: { id: true, name: true } },
+        },
+      });
+
+      // Any API key still pointing at this domain belongs to the old team.
+      // Clear the pointer so no key references a domain owned by another team.
+      await db.apiKey.updateMany({
+        where: { domainId: input.domainId },
+        data: { domainId: null },
+      });
+
+      return domain;
+    }),
 });

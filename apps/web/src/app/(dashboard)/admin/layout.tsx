@@ -15,16 +15,15 @@ export default function AdminLayout({
         <SettingsNavButton href="/admin">
           SES Configurations
         </SettingsNavButton>
-        {isCloud() ? (
-          <SettingsNavButton href="/admin/teams">
-            Teams
-          </SettingsNavButton>
-        ) : null}
-        {isCloud() ? (
-          <SettingsNavButton href="/admin/email-analytics">
-            Email analytics
-          </SettingsNavButton>
-        ) : null}
+        <SettingsNavButton href="/admin/domains">
+          Domains
+        </SettingsNavButton>
+        <SettingsNavButton href="/admin/teams">
+          Teams
+        </SettingsNavButton>
+        <SettingsNavButton href="/admin/email-analytics">
+          Email analytics
+        </SettingsNavButton>
         {isCloud() ? (
           <SettingsNavButton href="/admin/waitlist">
             Waitlist

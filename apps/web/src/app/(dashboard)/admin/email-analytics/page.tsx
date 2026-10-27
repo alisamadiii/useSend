@@ -21,12 +21,10 @@ import {
 } from "@usesend/ui/src/table";
 import Spinner from "@usesend/ui/src/spinner";
 import { api } from "~/trpc/react";
-import { isCloud } from "~/utils/common";
 import { timeframeOptions } from "./constants";
 import { keepPreviousData } from "@tanstack/react-query";
 
 export default function AdminEmailAnalyticsPage() {
-  const isCloudEnv = isCloud();
   const [timeframe, setTimeframe] =
     useState<(typeof timeframeOptions)[number]["value"]>("today");
   const [paidOnly, setPaidOnly] = useState(false);
@@ -36,7 +34,7 @@ export default function AdminEmailAnalyticsPage() {
       timeframe,
       paidOnly,
     },
-    { enabled: isCloudEnv, placeholderData: keepPreviousData }
+    { enabled: true, placeholderData: keepPreviousData }
   );
 
   const data = analyticsQuery.data;
@@ -52,14 +50,6 @@ export default function AdminEmailAnalyticsPage() {
   };
 
   const rows = useMemo(() => data?.rows ?? [], [data]);
-
-  if (!isCloudEnv) {
-    return (
-      <div className="rounded-lg border bg-muted/30 p-6 text-sm text-muted-foreground">
-        Email analytics are available only in the cloud deployment.
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
