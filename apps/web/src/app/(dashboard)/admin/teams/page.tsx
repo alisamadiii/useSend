@@ -50,6 +50,7 @@ type RouterOutputs = inferRouterOutputs<AppRouter>;
 type TeamRow = RouterOutputs["admin"]["listTeams"][number];
 
 const updateSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100),
   apiRateLimit: z.coerce.number().int().min(1).max(10_000),
   dailyEmailLimit: z.coerce.number().int().min(0).max(10_000_000),
   isBlocked: z.boolean(),
@@ -197,6 +198,7 @@ function EditTeamDialog({ team }: { team: TeamRow }) {
   const form = useForm<UpdateInput>({
     resolver: zodResolver(updateSchema),
     defaultValues: {
+      name: team.name,
       apiRateLimit: team.apiRateLimit,
       dailyEmailLimit: team.dailyEmailLimit,
       isBlocked: team.isBlocked,
@@ -207,6 +209,7 @@ function EditTeamDialog({ team }: { team: TeamRow }) {
   useEffect(() => {
     if (open) {
       form.reset({
+        name: team.name,
         apiRateLimit: team.apiRateLimit,
         dailyEmailLimit: team.dailyEmailLimit,
         isBlocked: team.isBlocked,
@@ -243,6 +246,19 @@ function EditTeamDialog({ team }: { team: TeamRow }) {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={updateTeam.isPending} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="apiRateLimit"

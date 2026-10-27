@@ -387,6 +387,7 @@ export const adminRouter = createTRPCRouter({
     .input(
       z.object({
         teamId: z.number(),
+        name: z.string().trim().min(1, "Name is required").max(100),
         apiRateLimit: z.number().int().min(1).max(10_000),
         dailyEmailLimit: z.number().int().min(0).max(10_000_000),
         isBlocked: z.boolean(),
