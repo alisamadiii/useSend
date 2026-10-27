@@ -79,4 +79,8 @@ ENV SKIP_ENV_VALIDATION="false"
 
 COPY  ./docker/start.sh ./start.sh
 
+# Expose the Next.js port so reverse proxies (Traefik) can auto-detect the
+# backend port when no explicit loadbalancer port label is provided.
+EXPOSE 3000
+
 CMD ["sh", "start.sh"]
