@@ -10,6 +10,7 @@ import { LimitReason } from "~/lib/constants/plans";
 import { LimitService } from "./limit-service";
 import { renderUsageLimitReachedEmail } from "../email-templates/UsageLimitReachedEmail";
 import { renderUsageWarningEmail } from "../email-templates/UsageWarningEmail";
+import { deleteDomain } from "./domain-service";
 
 // Cache stores exactly Prisma Team shape (no counts)
 
@@ -116,6 +117,46 @@ export class TeamService {
    */
   static async getAllTeams() {
     return db.team.findMany({ orderBy: { createdAt: "desc" } });
+  }
+
+  /**
+   * Permanently delete a team and all of its data. Admin-only.
+   * Refuses to delete a team the requester is a member of.
+   */
+  static async deleteTeam(teamId: number, requestingUserId: number) {
+    const membership = await db.teamUser.findFirst({
+      where: { teamId, userId: requestingUserId },
+    });
+    if (membership) {
+      throw new Error("You cannot delete a team you are a member of");
+    }
+
+    const team = await db.team.findUnique({ where: { id: teamId } });
+    if (!team) {
+      throw new Error("Team not found");
+    }
+
+    // Clean up AWS SES identities first — a raw cascade delete would orphan them.
+    const domains = await db.domain.findMany({
+      where: { teamId },
+      select: { id: true, name: true },
+    });
+    for (const domain of domains) {
+      try {
+        await deleteDomain(domain.id);
+      } catch (error) {
+        logger.error(
+          { err: error, domainId: domain.id, teamId },
+          "[TeamService.deleteTeam]: failed to clean up domain; continuing",
+        );
+      }
+    }
+
+    // Cascade removes all remaining child rows (members, api keys, emails, etc.).
+    await db.team.delete({ where: { id: teamId } });
+    await TeamService.invalidateTeamCache(teamId);
+
+    return { id: teamId };
   }
 
   /**

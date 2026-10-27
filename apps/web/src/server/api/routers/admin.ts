@@ -4,6 +4,7 @@ import { env } from "~/env";
 
 import { createTRPCRouter, adminProcedure } from "~/server/api/trpc";
 import { SesSettingsService } from "~/server/service/ses-settings-service";
+import { TeamService } from "~/server/service/team-service";
 import { getAccount } from "~/server/aws/ses";
 import { db } from "~/server/db";
 import { sendMail } from "~/server/mailer";
@@ -542,5 +543,11 @@ export const adminRouter = createTRPCRouter({
       });
 
       return domain;
+    }),
+
+  deleteTeam: adminProcedure
+    .input(z.object({ teamId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      return TeamService.deleteTeam(input.teamId, ctx.session.user.id);
     }),
 });

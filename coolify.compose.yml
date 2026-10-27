@@ -30,6 +30,8 @@ services:
       - API_RATE_LIMIT=${API_RATE_LIMIT:-2}
       # Instance-admin secret for the workspace provisioning API (client-hub)
       - USESEND_ADMIN_API_KEY=${USESEND_ADMIN_API_KEY:-}
+      # Shared sending domain any team may send from (client-hub contact emails)
+      - USESEND_SHARED_SENDING_DOMAIN=${USESEND_SHARED_SENDING_DOMAIN:-}
       # Email/password auth (no GitHub OAuth)
       - ADMIN_EMAIL=${ADMIN_EMAIL:-}
       - FROM_EMAIL=${FROM_EMAIL:-}

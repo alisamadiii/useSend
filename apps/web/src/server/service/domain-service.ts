@@ -346,8 +346,16 @@ export async function validateDomainFromEmail(email: string, teamId: number) {
     });
   }
 
+  // A single shared sending domain (env-configured) may be used by ANY team —
+  // it's looked up by name only, not scoped to the caller's team. Every other
+  // domain stays team-owned. The email still records the caller's teamId
+  // (email-service), so per-team lists stay isolated.
+  const isShared =
+    !!env.USESEND_SHARED_SENDING_DOMAIN &&
+    fromDomain === env.USESEND_SHARED_SENDING_DOMAIN;
+
   const domain = await db.domain.findFirst({
-    where: { name: fromDomain, teamId },
+    where: isShared ? { name: fromDomain } : { name: fromDomain, teamId },
   });
 
   if (!domain) {

@@ -28,6 +28,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 
 import { api } from "~/trpc/react";
+import { DeleteResource } from "~/components/DeleteResource";
 import type { AppRouter } from "~/server/api/root";
 import type { inferRouterOutputs } from "@trpc/server";
 
@@ -110,6 +111,19 @@ export default function AdminTeamsPage() {
     },
     onError: (error) => {
       toast.error(error.message ?? "Unable to update team settings");
+    },
+  });
+
+  const myTeamsQuery = api.team.getTeams.useQuery();
+
+  const deleteTeam = api.admin.deleteTeam.useMutation({
+    onSuccess: () => {
+      toast.success("Team deleted");
+      setTeam(null);
+      setHasSearched(false);
+    },
+    onError: (error) => {
+      toast.error(error.message ?? "Unable to delete team");
     },
   });
 
@@ -349,6 +363,39 @@ export default function AdminTeamsPage() {
                 </div>
               </form>
             </Form>
+          </div>
+
+          <div className="rounded-lg border border-destructive/40 p-6">
+            <h3 className="text-sm font-medium text-destructive">Danger zone</h3>
+            {myTeamsQuery.data?.some((t) => t.id === team.id) ? (
+              <p className="mt-2 text-sm text-muted-foreground">
+                You can't delete a team you belong to.
+              </p>
+            ) : (
+              <div className="mt-3">
+                <p className="mb-3 text-sm text-muted-foreground">
+                  Permanently delete this team and all of its members, domains,
+                  API keys, emails, campaigns and contacts. This cannot be undone.
+                </p>
+                <DeleteResource
+                  title="Delete team"
+                  resourceName={team.name}
+                  schema={z
+                    .object({ confirmation: z.string() })
+                    .refine((d) => d.confirmation === team.name, {
+                      message: "Name does not match",
+                      path: ["confirmation"],
+                    })}
+                  isLoading={deleteTeam.isPending}
+                  onConfirm={() => deleteTeam.mutate({ teamId: team.id })}
+                  descriptionBody="This permanently deletes the team, its members, domains, API keys, emails, campaigns and contacts. This cannot be undone."
+                  trigger={
+                    <Button variant="destructive">Delete team</Button>
+                  }
+                  confirmLabel="Delete team"
+                />
+              </div>
+            )}
           </div>
         </div>
       ) : null}
