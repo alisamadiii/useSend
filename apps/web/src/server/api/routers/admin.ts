@@ -550,4 +550,21 @@ export const adminRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return TeamService.deleteTeam(input.teamId, ctx.session.user.id);
     }),
+
+  listTeams: adminProcedure.query(async () => {
+    return db.team.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        plan: true,
+        apiRateLimit: true,
+        dailyEmailLimit: true,
+        isBlocked: true,
+        billingEmail: true,
+        createdAt: true,
+        _count: { select: { teamUsers: true, domains: true } },
+      },
+    });
+  }),
 });

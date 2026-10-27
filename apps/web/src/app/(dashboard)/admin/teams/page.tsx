@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@usesend/ui/src/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@usesend/ui/src/dialog";
 import {
   Form,
   FormControl,
@@ -25,24 +32,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@usesend/ui/src/select";
-import { formatDistanceToNow } from "date-fns";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@usesend/ui/src/table";
 
 import { api } from "~/trpc/react";
 import { DeleteResource } from "~/components/DeleteResource";
 import type { AppRouter } from "~/server/api/root";
 import type { inferRouterOutputs } from "@trpc/server";
 
-const searchSchema = z.object({
-  query: z
-    .string({ required_error: "Enter a team ID, name, domain, member email, or subscription ID" })
-    .trim()
-    .min(1, "Enter a team ID, name, domain, member email, or subscription ID"),
-});
-
-type SearchInput = z.infer<typeof searchSchema>;
-
 type RouterOutputs = inferRouterOutputs<AppRouter>;
-type TeamAdmin = NonNullable<RouterOutputs["admin"]["findTeam"]>;
+type TeamRow = RouterOutputs["admin"]["listTeams"][number];
 
 const updateSchema = z.object({
   apiRateLimit: z.coerce.number().int().min(1).max(10_000),
@@ -54,351 +59,305 @@ const updateSchema = z.object({
 type UpdateInput = z.infer<typeof updateSchema>;
 
 export default function AdminTeamsPage() {
-  const [team, setTeam] = useState<TeamAdmin | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
+  const utils = api.useUtils();
+  const [filter, setFilter] = useState("");
 
-  const searchForm = useForm<SearchInput>({
-    resolver: zodResolver(searchSchema),
-    defaultValues: { query: "" },
-  });
-
-  const updateForm = useForm<UpdateInput>({
-    resolver: zodResolver(updateSchema),
-    defaultValues: {
-      apiRateLimit: 1,
-      dailyEmailLimit: 0,
-      isBlocked: false,
-      plan: "FREE",
-    },
-  });
-
-  useEffect(() => {
-    if (team) {
-      updateForm.reset({
-        apiRateLimit: team.apiRateLimit,
-        dailyEmailLimit: team.dailyEmailLimit,
-        isBlocked: team.isBlocked,
-        plan: team.plan,
-      });
-    }
-  }, [team, updateForm]);
-
-  const findTeam = api.admin.findTeam.useMutation({
-    onSuccess: (data) => {
-      setHasSearched(true);
-      if (!data) {
-        setTeam(null);
-        toast.info("No team found for that query");
-        return;
-      }
-      setTeam(data);
-    },
-    onError: (error) => {
-      toast.error(error.message ?? "Unable to search for team");
-    },
-  });
-
-  const updateTeam = api.admin.updateTeamSettings.useMutation({
-    onSuccess: (updated) => {
-      setTeam(updated);
-      updateForm.reset({
-        apiRateLimit: updated.apiRateLimit,
-        dailyEmailLimit: updated.dailyEmailLimit,
-        isBlocked: updated.isBlocked,
-        plan: updated.plan,
-      });
-      toast.success("Team settings updated");
-    },
-    onError: (error) => {
-      toast.error(error.message ?? "Unable to update team settings");
-    },
-  });
-
+  const teamsQuery = api.admin.listTeams.useQuery();
   const myTeamsQuery = api.team.getTeams.useQuery();
+
+  const ownIds = useMemo(
+    () => new Set((myTeamsQuery.data ?? []).map((t) => t.id)),
+    [myTeamsQuery.data],
+  );
 
   const deleteTeam = api.admin.deleteTeam.useMutation({
     onSuccess: () => {
+      utils.admin.listTeams.invalidate();
       toast.success("Team deleted");
-      setTeam(null);
-      setHasSearched(false);
     },
     onError: (error) => {
       toast.error(error.message ?? "Unable to delete team");
     },
   });
 
-  const onSearchSubmit = (values: SearchInput) => {
-    setTeam(null);
-    setHasSearched(false);
-    findTeam.mutate(values);
-  };
+  const teams = teamsQuery.data ?? [];
+  const query = filter.trim().toLowerCase();
+  const filtered = query
+    ? teams.filter(
+        (t) =>
+          t.name.toLowerCase().includes(query) || String(t.id).includes(query),
+      )
+    : teams;
 
-  const onUpdateSubmit = (values: UpdateInput) => {
-    if (!team) return;
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold">Teams</h2>
+        <Input
+          placeholder="Filter by name or ID"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="w-64"
+        />
+      </div>
+
+      <div className="bg-card shadow-card overflow-hidden rounded-xl">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>ID</TableHead>
+              <TableHead>Plan</TableHead>
+              <TableHead className="text-right">Members</TableHead>
+              <TableHead className="text-right">Domains</TableHead>
+              <TableHead className="text-right">Daily limit</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {teamsQuery.isLoading ? (
+              <TableRow>
+                <TableCell colSpan={8} className="py-12 text-center">
+                  <Spinner className="mx-auto h-6 w-6" />
+                </TableCell>
+              </TableRow>
+            ) : filtered.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="py-12 text-center">
+                  No teams found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filtered.map((team) => (
+                <TableRow key={team.id}>
+                  <TableCell className="font-medium">{team.name}</TableCell>
+                  <TableCell>{team.id}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{team.plan}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {team._count.teamUsers}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {team._count.domains}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {team.dailyEmailLimit.toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={team.isBlocked ? "destructive" : "outline"}>
+                      {team.isBlocked ? "Blocked" : "Active"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-2">
+                      <EditTeamDialog team={team} />
+                      {ownIds.has(team.id) ? (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      ) : (
+                        <DeleteResource
+                          title="Delete team"
+                          resourceName={team.name}
+                          schema={z
+                            .object({ confirmation: z.string() })
+                            .refine((d) => d.confirmation === team.name, {
+                              message: "Name does not match",
+                              path: ["confirmation"],
+                            })}
+                          isLoading={deleteTeam.isPending}
+                          onConfirm={() =>
+                            deleteTeam.mutate({ teamId: team.id })
+                          }
+                          descriptionBody="This permanently deletes the team, its members, domains, API keys, emails, campaigns and contacts. This cannot be undone."
+                          trigger={
+                            <Button variant="destructive" size="sm">
+                              Delete
+                            </Button>
+                          }
+                          confirmLabel="Delete team"
+                        />
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+
+function EditTeamDialog({ team }: { team: TeamRow }) {
+  const utils = api.useUtils();
+  const [open, setOpen] = useState(false);
+
+  const form = useForm<UpdateInput>({
+    resolver: zodResolver(updateSchema),
+    defaultValues: {
+      apiRateLimit: team.apiRateLimit,
+      dailyEmailLimit: team.dailyEmailLimit,
+      isBlocked: team.isBlocked,
+      plan: team.plan,
+    },
+  });
+
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        apiRateLimit: team.apiRateLimit,
+        dailyEmailLimit: team.dailyEmailLimit,
+        isBlocked: team.isBlocked,
+        plan: team.plan,
+      });
+    }
+  }, [open, team, form]);
+
+  const updateTeam = api.admin.updateTeamSettings.useMutation({
+    onSuccess: () => {
+      utils.admin.listTeams.invalidate();
+      toast.success("Team updated");
+      setOpen(false);
+    },
+    onError: (error) => {
+      toast.error(error.message ?? "Unable to update team settings");
+    },
+  });
+
+  const onSubmit = (values: UpdateInput) => {
     updateTeam.mutate({ teamId: team.id, ...values });
   };
 
   return (
-    <div className="space-y-8">
-      <div className="bg-card shadow-card rounded-xl p-6">
-        <Form {...searchForm}>
-          <form
-            onSubmit={searchForm.handleSubmit(onSearchSubmit)}
-            className="space-y-4"
-            noValidate
-          >
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          Edit
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit {team.name}</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
-              control={searchForm.control}
-              name="query"
+              control={form.control}
+              name="apiRateLimit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Team lookup</FormLabel>
+                  <FormLabel>API rate limit</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Team ID, team name, domain, member email, or subscription ID"
-                      autoComplete="off"
+                      type="number"
+                      min={1}
+                      max={10000}
                       {...field}
-                      value={field.value}
+                      value={Number.isNaN(field.value) ? 1 : field.value}
+                      onChange={(event) =>
+                        field.onChange(Number(event.target.value))
+                      }
+                      disabled={updateTeam.isPending}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={findTeam.isPending}>
-              {findTeam.isPending ? (
-                <>
-                  <Spinner className="mr-2 h-4 w-4" /> Searching...
-                </>
-              ) : (
-                "Lookup team"
+            <FormField
+              control={form.control}
+              name="dailyEmailLimit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Daily email limit</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={10_000_000}
+                      {...field}
+                      value={Number.isNaN(field.value) ? 0 : field.value}
+                      onChange={(event) =>
+                        field.onChange(Number(event.target.value))
+                      }
+                      disabled={updateTeam.isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </Button>
+            />
+            <FormField
+              control={form.control}
+              name="plan"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Plan</FormLabel>
+                  <FormControl>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={updateTeam.isPending}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select plan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="FREE">Free</SelectItem>
+                        <SelectItem value="BASIC">Basic</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isBlocked"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Blocked</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center gap-3 rounded-md border px-3 py-2">
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={updateTeam.isPending}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        {field.value ? "Team is blocked" : "Team is active"}
+                      </span>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={updateTeam.isPending}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={updateTeam.isPending}>
+                {updateTeam.isPending ? (
+                  <>
+                    <Spinner className="mr-2 h-4 w-4" /> Saving...
+                  </>
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </div>
           </form>
         </Form>
-      </div>
-
-      {findTeam.isPending ? null : hasSearched && !team ? (
-        <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
-          No team matched that query. Try another search.
-        </div>
-      ) : null}
-
-      {team ? (
-        <div className="space-y-6 bg-card shadow-card rounded-xl p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm text-muted-foreground">Team</p>
-              <p className="text-xl font-semibold">{team.name}</p>
-              <p className="text-xs text-muted-foreground">
-                ID #{team.id} • Created {formatDistanceToNow(new Date(team.createdAt), { addSuffix: true })}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">Plan: {team.plan}</Badge>
-              <Badge variant={team.isBlocked ? "destructive" : "outline"}>
-                {team.isBlocked ? "Blocked" : "Active"}
-              </Badge>
-            </div>
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-2">
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Members</h3>
-              <div className="space-y-2 rounded-lg border bg-muted/20 p-3">
-                {team.teamUsers.length ? (
-                  team.teamUsers.map((member) => (
-                    <div
-                      key={member.user.id}
-                      className="flex items-center justify-between rounded-md bg-background px-3 py-2 text-sm"
-                    >
-                      <div>
-                        <p className="font-medium">{member.user.name ?? member.user.email}</p>
-                        <p className="text-xs text-muted-foreground">{member.user.email}</p>
-                      </div>
-                      <Badge variant="outline">{member.role}</Badge>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-muted-foreground">No members found.</p>
-                )}
-              </div>
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Domains</h3>
-              <div className="space-y-2 rounded-lg border bg-muted/20 p-3">
-                {team.domains.length ? (
-                  team.domains.map((domain) => (
-                    <div
-                      key={domain.id}
-                      className="flex items-center justify-between rounded-md bg-background px-3 py-2 text-sm"
-                    >
-                      <span>{domain.name}</span>
-                      <Badge variant={domain.status === "SUCCESS" ? "outline" : "secondary"}>
-                        {domain.status === "SUCCESS"
-                          ? "Verified"
-                          : domain.status.toLowerCase()}
-                      </Badge>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-xs text-muted-foreground">No domains connected.</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-lg border bg-muted/10 p-4">
-            <p className="text-sm text-muted-foreground">
-              Billing contact: {team.billingEmail ?? "Not set"}
-            </p>
-          </div>
-
-          <div className="rounded-lg border p-6">
-            <Form {...updateForm}>
-              <form onSubmit={updateForm.handleSubmit(onUpdateSubmit)} className="grid gap-6 lg:grid-cols-2">
-                <FormField
-                  control={updateForm.control}
-                  name="apiRateLimit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>API rate limit</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={10000}
-                          {...field}
-                          value={Number.isNaN(field.value) ? 1 : field.value}
-                          onChange={(event) =>
-                            field.onChange(Number(event.target.value))
-                          }
-                          disabled={updateTeam.isPending}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={updateForm.control}
-                  name="dailyEmailLimit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Daily email limit</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          max={10_000_000}
-                          {...field}
-                          value={Number.isNaN(field.value) ? 0 : field.value}
-                          onChange={(event) =>
-                            field.onChange(Number(event.target.value))
-                          }
-                          disabled={updateTeam.isPending}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={updateForm.control}
-                  name="plan"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Plan</FormLabel>
-                      <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          disabled={updateTeam.isPending}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select plan" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="FREE">Free</SelectItem>
-                            <SelectItem value="BASIC">Basic</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={updateForm.control}
-                  name="isBlocked"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Blocked</FormLabel>
-                      <FormControl>
-                        <div className="flex items-center gap-3 rounded-md border px-3 py-2">
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            disabled={updateTeam.isPending}
-                          />
-                          <span className="text-sm text-muted-foreground">
-                            {field.value ? "Team is blocked" : "Team is active"}
-                          </span>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="lg:col-span-2 flex justify-end">
-                  <Button type="submit" disabled={updateTeam.isPending}>
-                    {updateTeam.isPending ? (
-                      <>
-                        <Spinner className="mr-2 h-4 w-4" /> Saving...
-                      </>
-                    ) : (
-                      "Update team"
-                    )}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </div>
-
-          <div className="rounded-lg border border-destructive/40 p-6">
-            <h3 className="text-sm font-medium text-destructive">Danger zone</h3>
-            {myTeamsQuery.data?.some((t) => t.id === team.id) ? (
-              <p className="mt-2 text-sm text-muted-foreground">
-                You can't delete a team you belong to.
-              </p>
-            ) : (
-              <div className="mt-3">
-                <p className="mb-3 text-sm text-muted-foreground">
-                  Permanently delete this team and all of its members, domains,
-                  API keys, emails, campaigns and contacts. This cannot be undone.
-                </p>
-                <DeleteResource
-                  title="Delete team"
-                  resourceName={team.name}
-                  schema={z
-                    .object({ confirmation: z.string() })
-                    .refine((d) => d.confirmation === team.name, {
-                      message: "Name does not match",
-                      path: ["confirmation"],
-                    })}
-                  isLoading={deleteTeam.isPending}
-                  onConfirm={() => deleteTeam.mutate({ teamId: team.id })}
-                  descriptionBody="This permanently deletes the team, its members, domains, API keys, emails, campaigns and contacts. This cannot be undone."
-                  trigger={
-                    <Button variant="destructive">Delete team</Button>
-                  }
-                  confirmLabel="Delete team"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      ) : null}
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
