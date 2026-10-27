@@ -28,6 +28,8 @@ services:
       - REDIS_URL=redis://redis:6379
       - NEXT_PUBLIC_IS_CLOUD=false
       - API_RATE_LIMIT=${API_RATE_LIMIT:-2}
+      # Instance-admin secret for the workspace provisioning API (client-hub)
+      - USESEND_ADMIN_API_KEY=${USESEND_ADMIN_API_KEY:-}
       # Email/password auth (no GitHub OAuth)
       - ADMIN_EMAIL=${ADMIN_EMAIL:-}
       - FROM_EMAIL=${FROM_EMAIL:-}
